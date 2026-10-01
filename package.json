@@ -1,0 +1,44 @@
+{
+  "name": "markest-cli",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Publish, read and manage Markest artifacts from the command line, including artifacts encrypted end to end",
+  "keywords": [
+    "markest",
+    "markdown",
+    "publish",
+    "cli",
+    "mcp",
+    "end-to-end-encryption"
+  ],
+  "homepage": "https://marke.st",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/techdyn/markest-cli.git"
+  },
+  "type": "module",
+  "bin": {
+    "markest": "bin/markest.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "config/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-exclude=\"src/site/**\" --test-coverage-lines=85 --test-coverage-branches=70 --test-coverage-functions=85 \"tests/**/*.test.mjs\"",
+    "mutate": "node scripts/mutate.mjs",
+    "start": "node bin/markest.mjs"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "license": "MIT"
+}

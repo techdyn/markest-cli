@@ -1,0 +1,9 @@
+# Dependencies / build / reports / secrets
+node_modules/
+coverage/
+reports/
+.stryker-tmp/
+dist/
+.env
+.env.*
+*.log
