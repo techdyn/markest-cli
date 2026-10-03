@@ -120,7 +120,7 @@ test('what is asked wrongly is said in its own words, and nothing is asked of th
         for (const argv of [['versions', ID], ['diff', ID, '1'], ['restore', ID, '3']]) {
             const out = await markest(argv, { env: {} });
             assert.equal(out.code, 2, argv.join(' '));
-            assert.equal(out.stderr, 'markest: Set MARKEST_API_KEY to an API key from your account settings.\nRun markest --help for the commands.\n', argv.join(' '));
+            assert.equal(out.stderr, 'markest: Sign in with markest login, or set MARKEST_API_KEY to an API key from your account settings.\nRun markest --help for the commands.\n', argv.join(' '));
         }
         assert.equal(site.requests.length, 0);
     });

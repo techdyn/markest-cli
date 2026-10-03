@@ -9,19 +9,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { startFakeMarkest } from './support/fake-markest.mjs';
-import { freshKeyring, KEY } from './support/cli-harness.mjs';
+import { freshHome, KEY, homeEnv, testKeyring } from './support/cli-harness.mjs';
 import { createSealed, documentsFrom, linkFor, readSealed, removeSealed, writeSealed } from '../src/sealed/sealed-artifacts.mjs';
-import { openKeyring } from '../src/sealed/keyring.mjs';
 import { keyIn, openAll } from '../src/sealed/sealing.mjs';
 import { Refused } from '../src/core/command-kit.mjs';
 import { isEnvelope } from '../src/shared.mjs';
 
 async function withSite(body) {
     const site = await startFakeMarkest();
-    const keyring = await freshKeyring();
-    const ctx = { baseUrl: site.url, key: KEY, env: { MARKEST_KEYRING: keyring }, stderr: { write() {} }, version: '0' };
+    const keyring = await freshHome();
+    const ctx = { baseUrl: site.url, key: KEY, env: homeEnv(keyring), stderr: { write() {} }, version: '0' };
     try {
-        await body(site, ctx, openKeyring({ path: keyring }));
+        await body(site, ctx, testKeyring(keyring));
     } finally {
         await site.close();
     }

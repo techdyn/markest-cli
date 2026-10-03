@@ -11,9 +11,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { startFakeMarkest } from './support/fake-markest.mjs';
-import { freshKeyring, KEY, makeFolder, run } from './support/cli-harness.mjs';
+import { freshHome, KEY, makeFolder, run, testKeyring } from './support/cli-harness.mjs';
 import { newKey, sealAll } from '../src/sealed/sealing.mjs';
-import { openKeyring } from '../src/sealed/keyring.mjs';
 import { openIfSealed } from '../src/reading/sealed-reading.mjs';
 
 async function sealedSite() {
@@ -30,14 +29,14 @@ const leaked = (site, key) => site.requests.some((one) => JSON.stringify([one.pa
 test('opened with the key in its link, with a key or as a browser, the key never sent', async () => {
     const { site, key, paste, link } = await sealedSite();
     try {
-        const keyring = await freshKeyring();
-        const read = await run(['read', link, '--url', site.url], { MARKEST_API_KEY: KEY, MARKEST_KEYRING: keyring });
+        const keyring = await freshHome();
+        const read = await run(['read', link, '--url', site.url], { MARKEST_API_KEY: KEY, MARKEST_HOME: keyring });
         assert.equal(read.code, 0, read.stderr);
         assert.equal(read.stdout, '# The plan\n');
-        const anonymous = await run(['read', site.url + '/p/' + paste.id + '/notes.md#key=' + key, '--url', site.url, '--json'], { MARKEST_KEYRING: keyring });
+        const anonymous = await run(['read', site.url + '/p/' + paste.id + '/notes.md#key=' + key, '--url', site.url, '--json'], { MARKEST_HOME: keyring });
         assert.deepEqual(JSON.parse(anonymous.stdout), { id: paste.id, path: 'notes.md', content_type: 'markdown', content: 'Secret notes.', encrypted: true });
         assert.ok(!leaked(site, key), 'no request carried the key');
-        assert.deepEqual(await openKeyring({ path: keyring }).list(), [], 'and it was not kept, unasked');
+        assert.deepEqual(await testKeyring(keyring).list(), [], 'and it was not kept, unasked');
     } finally {
         await site.close();
     }
@@ -46,10 +45,10 @@ test('opened with the key in its link, with a key or as a browser, the key never
 test('kept when asked, and then opened by its id alone', async () => {
     const { site, key, paste, link } = await sealedSite();
     try {
-        const keyring = await freshKeyring();
-        const env = { MARKEST_API_KEY: KEY, MARKEST_KEYRING: keyring };
+        const keyring = await freshHome();
+        const env = { MARKEST_API_KEY: KEY, MARKEST_HOME: keyring };
         assert.equal((await run(['read', link, '--remember', '--url', site.url], env)).code, 0);
-        assert.equal(await openKeyring({ path: keyring }).get(site.url, paste.id), key);
+        assert.equal(await testKeyring(keyring).get(site.url, paste.id), key);
         const byId = await run(['read', paste.id, 'notes.md', '--url', site.url], env);
         assert.equal(byId.stdout, 'Secret notes.');
         const folder = await makeFolder({});
@@ -65,7 +64,7 @@ test('kept when asked, and then opened by its id alone', async () => {
 test('without a key, or with the wrong one, nothing is read and it says how to give one', async () => {
     const { site, paste, link } = await sealedSite();
     try {
-        const env = { MARKEST_API_KEY: KEY, MARKEST_KEYRING: await freshKeyring() };
+        const env = { MARKEST_API_KEY: KEY, MARKEST_HOME: await freshHome() };
         const none = await run(['read', paste.id, '--url', site.url], env);
         assert.equal(none.code, 1);
         assert.match(none.stderr, /encrypted end to end, and this machine keeps no key for it\. Name it by its whole link, the one ending #key=\.\.\./);
@@ -89,7 +88,7 @@ test('an artifact in the clear is handed on as it is', async () => {
 test('reading by id with --remember has nothing new to keep, and reads', async () => {
     const { site, paste, link } = await sealedSite();
     try {
-        const env = { MARKEST_API_KEY: KEY, MARKEST_KEYRING: await freshKeyring() };
+        const env = { MARKEST_API_KEY: KEY, MARKEST_HOME: await freshHome() };
         assert.equal((await run(['read', link, '--remember', '--url', site.url], env)).code, 0);
         const again = await run(['read', paste.id, '--remember', '--url', site.url], env);
         assert.equal(again.code, 0, again.stderr);

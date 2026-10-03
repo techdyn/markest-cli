@@ -65,7 +65,7 @@ test('each command says it needs agent access, and none runs without a key', asy
         for (const argv of [['comments'], ['reply', C1, 'hi'], ['resolve', C1]]) {
             const out = await markest(argv, { env: {} });
             assert.equal(out.code, 2, argv.join(' '));
-            assert.equal(out.stderr, 'markest: Set MARKEST_API_KEY to an API key from your account settings.' + AGAIN);
+            assert.equal(out.stderr, 'markest: Sign in with markest login, or set MARKEST_API_KEY to an API key from your account settings.' + AGAIN);
         }
         assert.equal(site.requests.length, 0);
     });

@@ -15,7 +15,7 @@ import { symlink } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { basename, join } from 'node:path';
 import { startFakeMarkest } from './support/fake-markest.mjs';
-import { freshKeyring, makeFolder, run, KEY } from './support/cli-harness.mjs';
+import { freshHome, makeFolder, run, KEY } from './support/cli-harness.mjs';
 import { publish } from '../src/publish/publish-run.mjs';
 import { scanFolder } from '../src/publish/folder-scan.mjs';
 import { ApiError } from '../src/core/api-client.mjs';
@@ -435,7 +435,7 @@ test('a dry run of an update only reads, counting what would change and which im
 });
 
 test('one encrypted end to end is published and updated by its own rules, and never with an image or sealed after it was made', async () => {
-    const env = { MARKEST_API_KEY: KEY, MARKEST_KEYRING: await freshKeyring() };
+    const env = { MARKEST_API_KEY: KEY, MARKEST_HOME: await freshHome() };
     await withSite({}, async (site) => {
         const folder = await makeFolder({ 'README.md': '# Sealed\n' });
         const made = await json(['publish', folder, '--url', site.url, '--sealed'], env);

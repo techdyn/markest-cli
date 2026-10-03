@@ -53,8 +53,9 @@ Options:
   --json                  Print one JSON object instead
   --url <site>            The site (default https://marke.st, or MARKEST_URL)
 
-The API key is read from MARKEST_API_KEY (or MARKEST_KEY). Creating needs
-create_paste; --update also read_own; --prune also delete_own.
+It acts as your sign-in (markest login), else the API key in MARKEST_API_KEY
+(or MARKEST_KEY). Creating needs create_paste, or a sign-in allowed to write;
+--update also read_own; --prune also delete_own.
 
 Exit codes: 0 done, 1 failed or partly done, 2 usage, 3 waiting for you to
 confirm publishing, 4 the folder cannot be published as it is (nothing sent).
@@ -112,7 +113,7 @@ export function needsKey({ options }) {
     return !(options.dryRun && options.update === null);
 }
 
-export async function run({ folder, options, key, baseUrl, env, stdout, stderr, fetch, version }) {
+export async function run({ folder, options, key, auth, vault, baseUrl, env, stdout, stderr, fetch, version }) {
     const info = await stat(folder).catch(() => null);
     if (info === null || !info.isDirectory()) {
         stderr.write('markest: ' + folder + ' is not a folder.\n');
@@ -121,14 +122,16 @@ export async function run({ folder, options, key, baseUrl, env, stdout, stderr, 
     const ignoreLines = [...await readIgnoreLines(folder), ...options.ignore];
     const scan = await scanFolder(folder, { ignoreLines, includeOutput: options.includeOutput, allowFiles: options.allowFiles });
     const log = (line) => stderr.write(line + '\n');
+    // The run's sign-in, or its key, as every command's client carries it (D-20261002-04)
     const client = createClient({
         baseUrl,
         key,
+        auth: auth?.present ? auth : null,
         fetch,
         version,
         onWait: ({ status, ms }) => log('The site asked to wait (' + status + '); trying again in ' + Math.round(ms / 1000) + ' s.'),
     });
-    const result = await publish({ scan, options, baseUrl }, { client, log: options.json ? () => {} : log, keyring: keyringFor({ env }) });
+    const result = await publish({ scan, options, baseUrl }, { client, log: options.json ? () => {} : log, keyring: keyringFor({ env, vault }) });
     if (options.json) {
         stdout.write(renderJson(result));
     } else {

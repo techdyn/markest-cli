@@ -5,8 +5,9 @@
  *              Codex, VS Code - offering the tools for artifacts encrypted end to
  *              end alone (D-20261001-01), beside the remote Markest connector,
  *              which offers the rest. Its stdout is the protocol's and nothing
- *              else's; the site and the API key come from the environment the
- *              client starts it with, MARKEST_URL and MARKEST_API_KEY.
+ *              else's; it acts as the account signed in with markest login, else
+ *              the API key in MARKEST_API_KEY, on the site MARKEST_URL names, from
+ *              the environment the client starts it with (D-20261002-04).
  *
  * @input A run's context; JSON-RPC on stdin
  * @output JSON-RPC on stdout; exit 0 when stdin ends
@@ -29,12 +30,14 @@ conversation, so its model provider sees it.
 Usage:
   markest mcp
 
-An agent client starts it. For Claude Code:
-  claude mcp add markest-sealed -e MARKEST_API_KEY=mk_live_... -- markest mcp
+An agent client starts it. For Claude Code, once you have run markest login:
+  claude mcp add markest-sealed -- markest mcp
 
-The site is MARKEST_URL (default https://marke.st); the API key,
-MARKEST_API_KEY, is needed to create and change artifacts, not to read
-one by its link. Keys are kept as markest keys keeps them.
+The site is MARKEST_URL (default https://marke.st). Creating and changing
+artifacts needs you signed in - markest login - or an API key in
+MARKEST_API_KEY (claude mcp add markest-sealed -e MARKEST_API_KEY=mk_live_...
+-- markest mcp); reading one by its link needs neither. Keys are kept as
+markest keys keeps them.
 `;
 
 export const command = {

@@ -88,7 +88,7 @@ Options:
         let refused = false;
         const code = await answer(ctx, async () => {
             const limits = (await client.request('GET', '/api/v1/drafts', { idempotent: true })).body;
-            if (!limits.enabled) throw new Refused('This site has publishing without an account turned off. Create an account and an API key, then markest publish.');
+            if (!limits.enabled) throw new Refused('This site has publishing without an account turned off. Create an account, run markest login, then markest publish.');
             const offered = await documentsOf(ctx.target, info);
             const paths = offered.documents.map((doc) => doc.path);
             const defaultPath = chooseDefault(paths, ctx.defaultPath);

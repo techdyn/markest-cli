@@ -225,7 +225,10 @@ test('the key, and anything shaped like one, is taken out of messages', async ()
     assert.equal(redact(null), '');
     assert.equal(redact(undefined, KEY), '');
     assert.equal(redact('bad ' + KEY + ' and mk_test_abcdef1234', KEY), 'bad mk_… and mk_…');
-    assert.equal(redact('oddly shaped: sekrit-123', 'sekrit-123'), 'oddly shaped: mk_…');
+    assert.equal(redact('oddly shaped: sekrit-123', 'sekrit-123'), 'oddly shaped: …', 'a secret not shaped like a key is not said to be one');
+    // A sign-in's tokens (D-20261002-04): each given, and anything shaped like an access token
+    assert.equal(redact('a eyJhbGciOiJIUzI1.eyJzdWIiOiI0Mi.c2lnbmF0dXJlLXg and r0123', ['r0123', '']), 'a eyJ… and …');
+    assert.equal(redact('both ' + KEY + ' and tok', [KEY, 'tok']), 'both mk_… and …');
     await withStub([{ status: 401, body: { error: 'Invalid key ' + KEY } }], async ({ client }) => {
         await assert.rejects(client.request('GET', '/x'), (error) => !error.message.includes(KEY) && error.message.includes('mk_…'));
     });
@@ -254,4 +257,88 @@ test('a connection lost with no cause says what was lost; an answer with no body
     await assert.rejects(client.request('GET', '/a'), { message: 'The site answered with a redirect to /elsewhere; give its address exactly with --url.' });
     assert.deepEqual((await client.request('GET', '/a', { idempotent: true })).body, { ok: 1 });
     assert.deepEqual(waits, [1000]);
+});
+
+/** A sign-in as the client sees one (cli/auth/credential): its token, renewed on asking. */
+function signIn(tokens, { renewFails = null } = {}) {
+    let at = 0;
+    return {
+        kind: 'oauth', present: true, renewals: 0,
+        async bearer() { return tokens[at]; },
+        async renew() {
+            this.renewals++;
+            if (renewFails) throw renewFails;
+            at++;
+            return true;
+        },
+        secrets() { return [tokens[at], 'refresh-secret']; },
+    };
+}
+
+test('a sign-in\'s token is the bearer; one the site refuses is renewed once and asked again (D-20261002-04)', async () => {
+    const site = await stub([{ status: 401, body: { error: 'The access token is invalid, expired or revoked: sign in again.' } }, { status: 200, body: { ok: true } }]);
+    try {
+        const auth = signIn(['eyJold', 'eyJnew']);
+        const client = createClient({ baseUrl: site.url, auth, sleep: async () => {} });
+        assert.deepEqual((await client.request('GET', '/api/v1/pastes')).body, { ok: true });
+        assert.deepEqual(site.seen.map((one) => one.headers.authorization), ['Bearer eyJold', 'Bearer eyJnew']);
+        assert.equal(auth.renewals, 1);
+    } finally {
+        await site.close();
+    }
+});
+
+test('a sign-in refused twice is said, renewed only once; a key is never renewed', async () => {
+    const site = await stub([{ status: 401, body: { error: 'no' } }, { status: 401, body: { error: 'Invalid ' + 'eyJnew' } }, { status: 401, body: { error: 'Invalid API key.' } }]);
+    try {
+        const auth = signIn(['eyJold', 'eyJnew']);
+        const client = createClient({ baseUrl: site.url, auth, sleep: async () => {} });
+        await assert.rejects(client.request('GET', '/x'), (error) => error.status === 401 && error.message === 'Invalid …' && !error.message.includes('eyJnew'));
+        assert.equal(auth.renewals, 1);
+        const keyed = createClient({ baseUrl: site.url, key: KEY, sleep: async () => {} });
+        await assert.rejects(keyed.request('GET', '/x'), /Invalid API key/);
+        assert.equal(site.seen.length, 3, 'the key was asked once');
+    } finally {
+        await site.close();
+    }
+});
+
+test('a sign-in that cannot be renewed, or whose token cannot be had, is a refusal like the site\'s', async () => {
+    const site = await stub([{ status: 401, body: { error: 'no' } }]);
+    try {
+        const ended = signIn(['eyJold'], { renewFails: Object.assign(new Error('Your sign-in to x has ended (refresh-secret gone). Run markest login to sign in again.'), { status: 401 }) });
+        await assert.rejects(createClient({ baseUrl: site.url, auth: ended }).request('GET', '/x'), (error) => error instanceof ApiError && error.status === 401 && /has ended \(… gone\)/.test(error.message));
+        const broken = { kind: 'oauth', present: true, bearer: async () => { throw new Error('The site is unavailable for now'); }, renew: async () => true, secrets: () => [] };
+        await assert.rejects(createClient({ baseUrl: site.url, auth: broken }).request('GET', '/x'), (error) => error instanceof ApiError && error.status === 401 && error.message === 'The site is unavailable for now');
+        assert.equal(site.seen.length, 1, 'nothing asked with no token to ask with');
+    } finally {
+        await site.close();
+    }
+});
+
+test('a client given no key at all sends no credential, and a key of any shape is kept out of messages', async () => {
+    const site = await stub([{ status: 200 }, { status: 400, body: { error: 'bad key sekrit-key-1' } }]);
+    try {
+        await createClient({ baseUrl: site.url, sleep: async () => {} }).request('GET', '/x');
+        assert.equal(site.seen[0].headers.authorization, undefined);
+        await assert.rejects(createClient({ baseUrl: site.url, key: 'sekrit-key-1', sleep: async () => {} }).request('GET', '/y'), (error) => error.message === 'bad key …');
+    } finally {
+        await site.close();
+    }
+});
+
+test('a sign-in is renewed only for a 401, a bodiless one too, and a renewal that fails with no status is a 401', async () => {
+    const answers = [new Response(JSON.stringify({ ok: 1 }), { status: 200 }), new Response(null, { status: 401 }), new Response(JSON.stringify({ ok: 2 }), { status: 200 })];
+    const seen = [];
+    const fetch = async (url, init) => { seen.push(init.headers.Authorization); return answers.shift(); };
+    const auth = signIn(['eyJone', 'eyJtwo']);
+    const client = createClient({ baseUrl: 'https://marke.st', auth, fetch, sleep: async () => {} });
+    assert.deepEqual((await client.request('GET', '/a')).body, { ok: 1 });
+    assert.equal(auth.renewals, 0, 'a 200 is never renewed');
+    assert.deepEqual((await client.request('GET', '/b')).body, { ok: 2 });
+    assert.deepEqual(seen, ['Bearer eyJone', 'Bearer eyJone', 'Bearer eyJtwo']);
+
+    const failing = signIn(['eyJx'], { renewFails: new Error('no status here') });
+    const refused = createClient({ baseUrl: 'https://marke.st', auth: failing, fetch: async () => new Response(null, { status: 401 }) });
+    await assert.rejects(refused.request('GET', '/c'), (error) => error.status === 401 && error.message === 'no status here');
 });

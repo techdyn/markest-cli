@@ -216,7 +216,7 @@ test('show and delete say exactly what they need, and list, show and delete ask 
         const paste = site.addPaste({ title: 'Kept' });
         const show = 'markest show <artifact>';
         const remove = 'markest delete <artifact>... --yes';
-        const keyless = 'Set MARKEST_API_KEY to an API key from your account settings.';
+        const keyless = 'Sign in with markest login, or set MARKEST_API_KEY to an API key from your account settings.';
         for (const [argv, said, env] of [
             [['show'], 'Name the artifact: ' + show],
             [['show', paste.id, paste.id], 'Too many arguments: ' + show],

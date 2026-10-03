@@ -11,7 +11,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { startFakeMarkest } from './support/fake-markest.mjs';
-import { freshKeyring, KEY, run } from './support/cli-harness.mjs';
+import { freshHome, homeEnv, KEY, run } from './support/cli-harness.mjs';
 import { keyIn } from '../src/sealed/sealing.mjs';
 import { INSTRUCTIONS, sealedTools } from '../src/mcp/sealed-tools.mjs';
 
@@ -72,7 +72,7 @@ test('the tools are the sealed ones alone, named apart, each saying what the mod
 
 test('an agent client initialises it, creates an artifact sealed here, and reads it back; stdout is the protocol alone', { timeout: 60000 }, async () => {
     const site = await startFakeMarkest();
-    const server = startServer({ MARKEST_URL: site.url, MARKEST_API_KEY: KEY, MARKEST_KEYRING: await freshKeyring() });
+    const server = startServer(homeEnv(await freshHome(), { MARKEST_URL: site.url, MARKEST_API_KEY: KEY }));
     try {
         const init = await server.request('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'test', version: '1' } });
         assert.equal(init.result.serverInfo.name, 'markest-sealed');
@@ -108,11 +108,14 @@ test('an agent client initialises it, creates an artifact sealed here, and reads
 
 test('it takes nothing on the command line, and says how a client starts it', async () => {
     assert.equal((await run(['mcp', 'extra'])).code, 2);
-    assert.match((await run(['help', 'mcp'])).stdout, /claude mcp add markest-sealed -e MARKEST_API_KEY=mk_live_\.\.\. -- markest mcp/);
+    const help = (await run(['help', 'mcp'])).stdout;
+    // Signed in, the client needs no key; a key is the other way (D-20261002-04)
+    assert.match(help, /once you have run markest login:\n {2}claude mcp add markest-sealed -- markest mcp\n/);
+    assert.match(help, /claude mcp add markest-sealed -e MARKEST_API_KEY=mk_live_\.\.\.\n-- markest mcp/);
 });
 
 test('it starts with no API key, since reading by a link needs none', async () => {
-    const out = await run(['mcp'], { MARKEST_KEYRING: await freshKeyring() }, { stdin: '{"jsonrpc":"2.0","id":1,"method":"ping"}\n' });
+    const out = await run(['mcp'], { MARKEST_HOME: await freshHome() }, { stdin: '{"jsonrpc":"2.0","id":1,"method":"ping"}\n' });
     assert.equal(out.code, 0, out.stderr);
     assert.equal(out.stdout, '{"jsonrpc":"2.0","id":1,"result":{}}\n');
 });

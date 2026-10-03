@@ -19,7 +19,7 @@ import { createSealed, linkFor, readSealed, removeSealed, writeSealed, MAX_DOCUM
 import { keyringFor } from '../sealed/keyring.mjs';
 import { keyIn, openAll } from '../sealed/sealing.mjs';
 import { ALL, fetchArtifact } from '../reading/artifact-source.mjs';
-import { clientsFor, Refused } from '../core/command-kit.mjs';
+import { clientsFor, Refused, hasCredential } from '../core/command-kit.mjs';
 import { pasteIdFrom } from '../core/site-args.mjs';
 
 const PRIVACY = ' Markest stores only ciphertext and never has the key; text read or written here does pass through this conversation, so the AI provider running it sees it.';
@@ -108,7 +108,7 @@ async function keys(ctx, { link = null }) {
     const key = keyIn(link);
     if (id === null || key === null) throw new Refused('Give the artifact\'s whole link, the one ending #key=...');
     const { rest } = clientsFor(ctx);
-    const artifact = await fetchArtifact(rest, { id, reference: link, keyed: Boolean(ctx.key), pick: ALL });
+    const artifact = await fetchArtifact(rest, { id, reference: link, keyed: hasCredential(ctx), pick: ALL });
     if (!artifact.sealed) throw new Refused('That artifact is not encrypted end to end: it needs no key.');
     await openAll(key, artifact.documents);
     await keyring.remember(ctx.baseUrl, id, key, artifact.title);

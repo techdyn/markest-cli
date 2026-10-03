@@ -10,17 +10,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { startFakeMarkest } from './support/fake-markest.mjs';
-import { freshKeyring, KEY, makeFolder, run } from './support/cli-harness.mjs';
+import { freshHome, KEY, makeFolder, run, testKeyring } from './support/cli-harness.mjs';
 import { keyIn, openAll } from '../src/sealed/sealing.mjs';
-import { openKeyring } from '../src/sealed/keyring.mjs';
 import { isEnvelope } from '../src/shared.mjs';
 
 const FOLDER = { 'README.md': '# Sealed plan\n\nStep one.\n', 'docs/setup.md': '# Setup\n', 'main.py': 'print(1)\n' };
 
 async function withSite(body) {
     const site = await startFakeMarkest();
-    const keyring = await freshKeyring();
-    const env = { MARKEST_API_KEY: KEY, MARKEST_KEYRING: keyring };
+    const keyring = await freshHome();
+    const env = { MARKEST_API_KEY: KEY, MARKEST_HOME: keyring };
     try {
         await body(site, (argv) => run([...argv, '--url', site.url], env), keyring);
     } finally {
@@ -47,7 +46,7 @@ test('a folder goes as envelopes with their types, the key only in the link prin
         assert.match(out.stdout, new RegExp('^' + site.url.replace(/[.]/g, '\\.') + '/p/' + paste.id + '#key=[A-Za-z0-9_-]{43}\\n$'));
         assert.match(out.stderr, /Encrypted end to end: the key is in this link and kept on this machine \(markest keys\)\. Whoever has the link can read it\./);
         assert.ok(!leaked(site, key), 'the key went nowhere');
-        assert.equal(await openKeyring({ path: keyring }).get(site.url, paste.id), key, 'kept here');
+        assert.equal(await testKeyring(keyring).get(site.url, paste.id), key, 'kept here');
         assert.deepEqual((await opened(site, paste, key)).map((doc) => doc.content), [FOLDER['README.md'], FOLDER['docs/setup.md'], FOLDER['main.py']]);
         assert.equal(paste.defaultPath, 'README.md');
 
@@ -80,7 +79,7 @@ test('an update opens what is there with the link\'s key, and seals only what ch
         paste.documents.find((doc) => doc.path === 'notes.txt').content_type = 'code';
         const { sealAll } = await import('../src/sealed/sealing.mjs');
         paste.documents.find((doc) => doc.path === 'notes.txt').content = (await sealAll(key, [{ path: 'notes.txt', contentType: 'code', content: 'notes' }]))[0].content;
-        await openKeyring({ path: keyring }).forget(site.url, paste.id);
+        await testKeyring(keyring).forget(site.url, paste.id);
 
         const changed = await makeFolder({ 'README.md': '# Plan, again\n', 'notes.txt': 'more notes', 'new.md': 'new' });
         const before = site.requests.length;
@@ -91,7 +90,7 @@ test('an update opens what is there with the link\'s key, and seals only what ch
         assert.ok(sent.every((doc) => isEnvelope(doc.content)));
         assert.deepEqual(Object.fromEntries((await opened(site, paste, key)).map((doc) => [doc.path, doc.content])), { 'README.md': '# Plan, again\n', 'notes.txt': 'more notes', 'new.md': 'new' }, 'old.md pruned');
         assert.equal(out.stdout, link.replace(/\/p\/.*#/, '/p/' + paste.id + '#') + '\n', 'the link again');
-        assert.equal(await openKeyring({ path: keyring }).get(site.url, paste.id), key, 'the owner\'s key kept again');
+        assert.equal(await testKeyring(keyring).get(site.url, paste.id), key, 'the owner\'s key kept again');
         assert.ok(!leaked(site, key));
 
         const same = await markest(['publish', changed, '--update', paste.id]);
@@ -106,7 +105,7 @@ test('an update with no key, the wrong key, an image, or --sealed on an artifact
     await withSite(async (site, markest, keyring) => {
         const link = (await markest(['publish', await makeFolder({ 'README.md': '# P\n' }), '--sealed'])).stdout.trim();
         const [paste] = site.pastes.values();
-        await openKeyring({ path: keyring }).forget(site.url, paste.id);
+        await testKeyring(keyring).forget(site.url, paste.id);
         const writes = () => site.requests.filter((one) => one.method !== 'GET').length;
         const before = writes();
         const none = await markest(['publish', await makeFolder({ 'README.md': 'x' }), '--update', paste.id]);
@@ -132,7 +131,7 @@ test('a key that cannot be kept is a warning, as the link printed still holds it
     const site = await startFakeMarkest();
     try {
         const folder = await makeFolder({ 'README.md': '# P\n', 'blocker': 'a file where the store\'s folder would be' });
-        const out = await run(['publish', folder, '--sealed', '--ignore', 'blocker', '--url', site.url], { MARKEST_API_KEY: KEY, MARKEST_KEYRING: folder + '/blocker/keys.json' });
+        const out = await run(['publish', folder, '--sealed', '--ignore', 'blocker', '--url', site.url], { MARKEST_API_KEY: KEY, MARKEST_HOME: folder + '/blocker/keys.json' });
         assert.equal(out.code, 0, out.stderr);
         assert.match(out.stdout, /#key=/);
         assert.match(out.stderr, /could not keep the key; keep the link printed, which holds it/);

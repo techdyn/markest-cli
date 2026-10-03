@@ -1,17 +1,20 @@
 /**
  * @module cli/api-client
- * @description The tool's requests to the site. Each carries the key as a
- *              Bearer token, and one made with no key carries no credential; no
- *              redirect is followed, so the key never goes to another address. A 429 waits as long as `Retry-After` asks (5 s
+ * @description The tool's requests to the site. Each carries the run's
+ *              credential as a Bearer token - the sign-in's access token, or the
+ *              key (D-20261002-04) - and one made with none carries none; a
+ *              sign-in's token the site refuses with 401 is refreshed once and
+ *              the request asked again. No redirect is followed, so a
+ *              credential never goes to another address. A 429 waits as long as `Retry-After` asks (5 s
  *              when it says nothing, a minute at most, editor/image-transfer's
  *              rule) and is tried again, up to five times; a 503 does too, unless
  *              it asks for longer than a minute - the site is being updated -
  *              when the command stops and says so. A lost connection, a 502 or a
  *              504 is tried again twice, and only for a request that is safe to
- *              repeat. The key, and anything shaped like one, is removed from
- *              every message the client passes on.
+ *              repeat. The key and the sign-in's tokens, and anything shaped
+ *              like either, are removed from every message the client passes on.
  *
- * @input `{ baseUrl, key, fetch, sleep, timeoutMs, onWait, version }`
+ * @input `{ baseUrl, key | auth, fetch, sleep, timeoutMs, onWait, version }`
  * @output `{ request(method, path, options) -> { status, body, text }, requests }`; ApiError
  * @dependencies cli/shared
  */
@@ -19,6 +22,8 @@
 import { retryAfterMs } from '../shared.mjs';
 
 const KEY_SHAPE = /mk_[a-z]+_[0-9a-f]{8,}/g;
+/** An access token's shape: a JWT's three parts. */
+const TOKEN_SHAPE = /eyJ[\w-]{8,}\.[\w-]{8,}\.[\w-]{8,}/g;
 const MAX_WAITS = 5;
 const MAX_WAIT_SECONDS = 60;
 const RETRIES = [1000, 2000];
@@ -32,12 +37,12 @@ export class ApiError extends Error {
     }
 }
 
-/** A message with the key, and anything shaped like one, taken out. */
-// Stryker disable next-line StringLiteral: equivalent - every caller passes the client's key, so the default is never read
-export function redact(text, key = '') {
+/** A message with the key or the sign-in's tokens, and anything shaped like either, taken out. */
+// Stryker disable next-line StringLiteral: equivalent - every caller passes the client's secrets, so the default is never read
+export function redact(text, secrets = '') {
     let out = String(text ?? '');
-    if (key !== '') out = out.split(key).join('mk_…');
-    return out.replace(KEY_SHAPE, 'mk_…');
+    for (const secret of [secrets].flat()) if (secret) out = out.split(secret).join(secret.startsWith('mk_') ? 'mk_…' : '…');
+    return out.replace(KEY_SHAPE, 'mk_…').replace(TOKEN_SHAPE, 'eyJ…');
 }
 
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -50,8 +55,20 @@ function messageOf(parsed) {
     return null;
 }
 
-export function createClient({ baseUrl, key, fetch = globalThis.fetch, sleep = pause, timeoutMs = 120000, onWait = () => {}, version = '0' }) {
+export function createClient({ baseUrl, key = '', auth = null, fetch = globalThis.fetch, sleep = pause, timeoutMs = 120000, onWait = () => {}, version = '0' }) {
     const client = { requests: 0 };
+    // The sign-in when there is one, else the key as it was given
+    const secrets = () => (auth ? auth.secrets() : [key]);
+
+    /** The credential's bearer: a sign-in whose refresh the site refused is a refusal like any other. */
+    async function bearer() {
+        if (!auth) return key;
+        try {
+            return await auth.bearer();
+        } catch (error) {
+            throw new ApiError(redact(error.message, secrets()), { status: error.status || 401 });
+        }
+    }
 
     async function once(method, path, { json, body, contentType, query, accept, headers: extra }) {
         const url = new URL(baseUrl + path);
@@ -61,8 +78,9 @@ export function createClient({ baseUrl, key, fetch = globalThis.fetch, sleep = p
             'User-Agent': 'markest-cli/' + version + ' node/' + process.version,
             ...(extra ?? {}),
         };
-        // No key, no credential: what needs none - a draft, a public read - goes without one
-        if (key !== '') headers.Authorization = 'Bearer ' + key;
+        // No credential: what needs none - a draft, a public read - goes without one
+        const token = await bearer();
+        if (token !== '') headers.Authorization = 'Bearer ' + token;
         let payload = body;
         if (json !== undefined) {
             payload = JSON.stringify(json);
@@ -89,27 +107,40 @@ export function createClient({ baseUrl, key, fetch = globalThis.fetch, sleep = p
     client.request = async function request(method, path, options = {}) {
         let waits = 0;
         let retries = 0;
+        let renewed = false;
         for (;;) {
             let response;
             try {
                 response = await once(method, path, options);
             } catch (error) {
+                if (error instanceof ApiError) throw error;
                 if (options.idempotent && retries < RETRIES.length) {
                     await sleep(RETRIES[retries++]);
                     continue;
                 }
-                throw new ApiError(redact('The connection to the site was lost: ' + (error.cause?.code ?? error.message), key), { lost: true });
+                throw new ApiError(redact('The connection to the site was lost: ' + (error.cause?.code ?? error.message), secrets()), { lost: true });
             }
             const status = response.status;
+            // A sign-in's access token the site refused - lapsed early, or the clock off - is refreshed once and asked again
+            if (status === 401 && auth?.kind === 'oauth' && !renewed) {
+                renewed = true;
+                await response.body?.cancel();
+                try {
+                    await auth.renew();
+                } catch (error) {
+                    throw new ApiError(redact(error.message, secrets()), { status: error.status || 401 });
+                }
+                continue;
+            }
             if (status >= 300 && status < 400) {
                 await response.body?.cancel();
-                throw new ApiError('The site answered with a redirect to ' + redact(response.headers.get('location') ?? 'elsewhere', key)
+                throw new ApiError('The site answered with a redirect to ' + redact(response.headers.get('location') ?? 'elsewhere', secrets())
                     + '; give its address exactly with --url.', { status });
             }
             if (status === 429 || status === 503) {
                 const seconds = Number(response.headers.get('retry-after'));
                 const { text, parsed } = await answerOf(response);
-                const message = redact(messageOf(parsed) ?? text.slice(0, 200), key);
+                const message = redact(messageOf(parsed) ?? text.slice(0, 200), secrets());
                 if ((status === 503 && Number.isFinite(seconds) && seconds > MAX_WAIT_SECONDS) || waits >= MAX_WAITS) {
                     throw new ApiError(status === 503 ? 'The site is unavailable for now: ' + message : 'Too many requests: ' + message, { status, body: parsed });
                 }
@@ -127,7 +158,7 @@ export function createClient({ baseUrl, key, fetch = globalThis.fetch, sleep = p
             const { text, parsed } = await answerOf(response);
             // Stryker disable next-line ConditionalExpression,EqualityOperator: equivalent - fetch hands over no status under 200, and a 300 is a redirect, refused above
             if (status >= 200 && status < 300) return { status, body: parsed, text };
-            throw new ApiError(redact(messageOf(parsed) ?? (text.slice(0, 200) || 'HTTP ' + status), key), { status, body: parsed });
+            throw new ApiError(redact(messageOf(parsed) ?? (text.slice(0, 200) || 'HTTP ' + status), secrets()), { status, body: parsed });
         }
     };
 

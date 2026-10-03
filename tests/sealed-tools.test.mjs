@@ -7,22 +7,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { startFakeMarkest } from './support/fake-markest.mjs';
-import { freshKeyring, KEY } from './support/cli-harness.mjs';
+import { freshHome, KEY, homeEnv, testKeyring } from './support/cli-harness.mjs';
 import { createRpc } from '../src/mcp/json-rpc.mjs';
 import { INSTRUCTIONS, sealedTools } from '../src/mcp/sealed-tools.mjs';
 import { isRefusal } from '../src/core/command-kit.mjs';
-import { openKeyring } from '../src/sealed/keyring.mjs';
 import { keyIn } from '../src/sealed/sealing.mjs';
 
 async function withServer(body) {
     const site = await startFakeMarkest();
-    const keyring = await freshKeyring();
-    const ctx = { baseUrl: site.url, key: KEY, env: { MARKEST_KEYRING: keyring }, stderr: { write() {} }, version: '0', json: true };
+    const keyring = await freshHome();
+    const ctx = { baseUrl: site.url, key: KEY, env: homeEnv(keyring), stderr: { write() {} }, version: '0', json: true };
     const rpc = createRpc({ name: 'markest-sealed', version: '0', instructions: INSTRUCTIONS, tools: sealedTools(ctx), isRefusal });
     let serial = 0;
     const call = async (name, args) => (await rpc.handle({ jsonrpc: '2.0', id: ++serial, method: 'tools/call', params: { name, arguments: args } })).result;
     try {
-        await body({ site, call, keyring: openKeyring({ path: keyring }) });
+        await body({ site, call, keyring: testKeyring(keyring) });
     } finally {
         await site.close();
     }

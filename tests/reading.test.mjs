@@ -49,7 +49,7 @@ test('without a key it reads as a browser would, and markdown asks for one', asy
         assert.ok(site.requests.every((one) => !one.headers.authorization));
         const markdown = await run(['read', paste.id, '--format', 'markdown', '--url', site.url], {});
         assert.equal(markdown.code, 2);
-        assert.match(markdown.stderr, /needs MARKEST_API_KEY/);
+        assert.match(markdown.stderr, /needs you signed in \(markest login\) or MARKEST_API_KEY/);
     });
 });
 

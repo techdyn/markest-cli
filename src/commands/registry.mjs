@@ -1,7 +1,7 @@
 /**
  * @module cli/commands/registry
  * @description Every command the tool has, by name, in the order its help
- *              lists them: publishing first, then reading, managing, the
+ *              lists them: signing in first, then publishing, reading, managing, the
  *              artifact's history, its conversation and its readers, searching,
  *              the keys of encrypted artifacts, and every agent tool the site
  *              has. A command is an object with its name, a one-line summary,
@@ -14,6 +14,7 @@
  * @dependencies cli/commands/*
  */
 
+import { commands as auth } from './auth.mjs';
 import { command as publish } from './publish.mjs';
 import { commands as draft } from './draft.mjs';
 import { commands as reading } from './reading.mjs';
@@ -28,7 +29,7 @@ import { commands as tools } from './tools.mjs';
 import { commands as keys } from './keys.mjs';
 import { command as mcp } from './mcp.mjs';
 
-const ALL = [publish, ...draft, ...reading, ...artifacts, ...settings, ...images, ...history, ...conversation, ...sharing, ...search, ...keys, mcp, ...tools];
+const ALL = [...auth, publish, ...draft, ...reading, ...artifacts, ...settings, ...images, ...history, ...conversation, ...sharing, ...search, ...keys, mcp, ...tools];
 
 export const COMMANDS = new Map(ALL.map((one) => [one.name, one]));
 

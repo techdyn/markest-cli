@@ -18,7 +18,7 @@
  */
 
 import { detectContentType, isContentType, linkWithKey, validatePath } from '../shared.mjs';
-import { clientsFor, Refused } from '../core/command-kit.mjs';
+import { clientsFor, Refused, hasCredential } from '../core/command-kit.mjs';
 import { pasteIdFrom } from '../core/site-args.mjs';
 import { batchesOf, preflight } from '../publish/publish-plan.mjs';
 import { call, removeDocuments, sendDocuments, Stop } from '../publish/publish-steps.mjs';
@@ -48,7 +48,7 @@ function idOf(reference) {
 }
 
 function needsKey(ctx) {
-    if (!ctx.key) throw new Refused('This needs a Markest API key: set MARKEST_API_KEY where this server is started.');
+    if (!hasCredential(ctx)) throw new Refused('This needs you signed in to Markest: run markest login, or set MARKEST_API_KEY where this server is started.');
 }
 
 /** Documents as given, checked as the site checks them, each with its type. */
@@ -114,7 +114,7 @@ export async function createSealed(ctx, { title = null, documents, visibility = 
 async function opened(ctx, reference, { remember = false } = {}) {
     const id = idOf(reference);
     const { rest } = clientsFor(ctx);
-    const artifact = await fetchArtifact(rest, { id, reference, keyed: Boolean(ctx.key), pick: ALL });
+    const artifact = await fetchArtifact(rest, { id, reference, keyed: hasCredential(ctx), pick: ALL });
     if (!artifact.sealed) return { artifact, key: null };
     const keyring = keyringFor(ctx);
     const given = keyIn(reference);

@@ -5,23 +5,23 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { join } from 'node:path';
 import { startFakeMarkest } from './support/fake-markest.mjs';
-import { freshKeyring, KEY, run } from './support/cli-harness.mjs';
+import { freshHome, KEY, run, testKeyring } from './support/cli-harness.mjs';
 import { newKey, sealAll } from '../src/sealed/sealing.mjs';
-import { openKeyring } from '../src/sealed/keyring.mjs';
 
 test('keys lists the artifacts whose keys are kept, never a key', async () => {
-    const path = await freshKeyring();
-    const env = { MARKEST_KEYRING: path };
+    const path = await freshHome();
+    const env = { MARKEST_HOME: path };
     assert.equal((await run(['keys'], env)).stdout, 'No keys are kept on this machine.\n');
     const { text } = await newKey();
-    await openKeyring({ path }).remember('https://marke.st', '01ARZ3NDEKTSV4RRFFQ69G5FAV', text, 'Plan');
+    await testKeyring(path).remember('https://marke.st', '01ARZ3NDEKTSV4RRFFQ69G5FAV', text, 'Plan');
     const out = await run(['keys'], env);
     assert.match(out.stdout, /^ID +SITE +KEPT \(UTC\) +TITLE\n01ARZ3NDEKTSV4RRFFQ69G5FAV +https:\/\/marke\.st +\d{4}-\d\d-\d\d \d\d:\d\d +Plan\n$/);
     assert.match(out.stderr, /Kept in /);
     assert.ok(!out.stdout.includes(text) && !out.stderr.includes(text));
     const json = JSON.parse((await run(['keys', '--json'], env)).stdout);
-    assert.equal(json.path, path);
+    assert.equal(json.path, join(path, 'keys.vault'));
     assert.ok(!JSON.stringify(json).includes(text));
 });
 
@@ -32,9 +32,9 @@ test('a key is kept from a link only once it opens the artifact, and forgotten w
         const sealed = await sealAll(text, [{ path: 'a.md', contentType: 'markdown', content: 'secret' }]);
         const paste = site.addPaste({ title: 'Plan', sealed: true, documents: [{ path: 'a.md', content: sealed[0].content, content_type: 'markdown' }] });
         const clear = site.addPaste({ title: 'Clear', documents: [{ path: 'a.md', content: 'plain' }] });
-        const path = await freshKeyring();
-        const env = { MARKEST_API_KEY: KEY, MARKEST_KEYRING: path };
-        const keyring = openKeyring({ path });
+        const path = await freshHome();
+        const env = { MARKEST_API_KEY: KEY, MARKEST_HOME: path };
+        const keyring = testKeyring(path);
 
         const other = (await newKey()).text;
         const wrong = await run(['keys', '--add', site.url + '/p/' + paste.id + '#key=' + other, '--url', site.url], env);
@@ -76,17 +76,17 @@ test('a key is kept from a link a browser could open, with no API key, and said 
         const { text } = await newKey();
         const sealed = await sealAll(text, [{ path: 'a.md', contentType: 'markdown', content: 'secret' }]);
         const paste = site.addPaste({ title: 'Plan', sealed: true, documents: [{ path: 'a.md', content: sealed[0].content, content_type: 'markdown' }] });
-        const path = await freshKeyring();
-        const out = await run(['keys', '--add', site.url + '/p/' + paste.id + '#key=' + text, '--url', site.url], { MARKEST_KEYRING: path });
+        const path = await freshHome();
+        const out = await run(['keys', '--add', site.url + '/p/' + paste.id + '#key=' + text, '--url', site.url], { MARKEST_HOME: path });
         assert.equal(out.code, 0, out.stderr);
         assert.deepEqual(site.requests.map((one) => one.path), ['/api/p/' + paste.id + '/manifest', '/api/p/' + paste.id + '/doc'], 'as a browser reads it');
-        const listed = await run(['keys'], { MARKEST_KEYRING: path });
-        assert.equal(listed.stderr, 'Kept in ' + path + '\n');
-        const forgot = await run(['keys', '--forget', paste.id, '--url', site.url, '--json'], { MARKEST_KEYRING: path });
+        const listed = await run(['keys'], { MARKEST_HOME: path });
+        assert.equal(listed.stderr, 'Kept in ' + join(path, 'keys.vault') + '\n');
+        const forgot = await run(['keys', '--forget', paste.id, '--url', site.url, '--json'], { MARKEST_HOME: path });
         assert.deepEqual(JSON.parse(forgot.stdout), { forgotten: paste.id });
-        const again = await run(['keys', '--forget', paste.id, '--url', site.url], { MARKEST_KEYRING: path });
+        const again = await run(['keys', '--forget', paste.id, '--url', site.url], { MARKEST_HOME: path });
         assert.equal(again.stderr, 'markest: No key for ' + paste.id + ' is kept for ' + site.url + '.\n');
-        const elsewhere = await run(['keys', '--add', 'https://marke.st/u/someone#key=' + text], { MARKEST_KEYRING: path });
+        const elsewhere = await run(['keys', '--add', 'https://marke.st/u/someone#key=' + text], { MARKEST_HOME: path });
         assert.equal(elsewhere.code, 2, 'a link that names no artifact');
         assert.match(elsewhere.stderr, /whole link/);
     } finally {
@@ -100,11 +100,11 @@ test('with an API key a private artifact is opened through the API, the only way
         const { text } = await newKey();
         const sealed = await sealAll(text, [{ path: 'a.md', contentType: 'markdown', content: 'secret' }]);
         const paste = site.addPaste({ title: 'Plan', sealed: true, visibility: 'private', documents: [{ path: 'a.md', content: sealed[0].content, content_type: 'markdown' }] });
-        const path = await freshKeyring();
-        const out = await run(['keys', '--add', site.url + '/p/' + paste.id + '#key=' + text, '--url', site.url], { MARKEST_API_KEY: KEY, MARKEST_KEYRING: path });
+        const path = await freshHome();
+        const out = await run(['keys', '--add', site.url + '/p/' + paste.id + '#key=' + text, '--url', site.url], { MARKEST_API_KEY: KEY, MARKEST_HOME: path });
         assert.equal(out.code, 0, out.stderr);
         assert.ok(site.requests.every((one) => one.path.startsWith('/api/v1/')), site.requests.map((one) => one.path).join(' '));
-        assert.equal(await openKeyring({ path }).get(site.url, paste.id), text);
+        assert.equal(await testKeyring(path).get(site.url, paste.id), text);
     } finally {
         await site.close();
     }

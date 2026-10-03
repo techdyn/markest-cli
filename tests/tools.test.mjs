@@ -107,7 +107,7 @@ test('a wrong name or arguments are refused in so many words, and nothing runs w
         for (const argv of [['tools'], ['call', 'search', '{}']]) {
             const out = await markest(argv, { env: {} });
             assert.equal(out.code, 2, argv.join(' '));
-            assert.equal(out.stderr, 'markest: Set MARKEST_API_KEY to an API key from your account settings.' + AGAIN);
+            assert.equal(out.stderr, 'markest: Sign in with markest login, or set MARKEST_API_KEY to an API key from your account settings.' + AGAIN);
         }
         assert.equal(site.requests.length, 0, 'nothing is sent');
         for (const [stdin, message] of [['5', 'The arguments are one JSON object.'], ['not json', 'What arrived on stdin is not JSON.']]) {

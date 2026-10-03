@@ -3,7 +3,7 @@
 Markest from the command line: publish a folder as one artifact, read and manage your artifacts, and work with artifacts **encrypted end to end** — sealed on your machine, so the site only ever holds ciphertext. It also runs a small **MCP server** that gives an AI agent the same end-to-end tools.
 
 ```bash
-export MARKEST_API_KEY=mk_live_…          # from Account → API keys on marke.st
+markest login                              # sign in in your browser (or with a code, over SSH)
 markest publish ./docs                     # prints the artifact's address
 markest publish ./notes --sealed           # encrypted end to end; the address carries the key
 markest read https://marke.st/p/01J…#key=… # opens it again, here
@@ -15,6 +15,9 @@ It needs Node 20.19 or later and has no dependencies. Until it is on npm, run it
 
 | Command | |
 |---|---|
+| `login` | Sign in: in the browser, with a code (`--device`), or keep an API key (`--with-key`) |
+| `logout` | End the sign-in on the site and forget it here |
+| `status` | Which credential the commands use, and where it is kept |
 | `publish <folder>` | Publish a folder as one artifact, or update one (`--update`); `--sealed` encrypts it end to end |
 | `draft <file\|folder>` | Publish without an account: live for a day unless claimed |
 | `read <artifact> [<path>]` | Print one document |
@@ -45,9 +48,21 @@ An artifact is named by its id or by any of its addresses. `markest help <comman
 
 **Which plan features they use.** `publish`, `draft`, `read`, `pull`, `list`, `show`, `set`, `visibility`, `delete`, `images` and `versions` use the REST API, which your plan's API access opens. `diff`, `restore`, `comments`, `reply`, `resolve`, `link --signed`, `collaborators`, `fork`, `views`, `preview`, `grep`, `tools` and `call` use the site's agent tools, which your plan's agent (MCP) access opens; the site says so when it does not.
 
-## The key
+## Signing in
 
-`MARKEST_API_KEY` (or `MARKEST_KEY`), never a flag, so it stays out of your shell history. Give it the permissions the commands need: `create_paste` to publish and change, `read_own` to read and update, `list_own` to list, `delete_own` to delete and prune. The key is never printed, and is taken out of every message. `read` and `pull` need no key for a public or unlisted artifact, or a private one shared by a signed link; `draft` never sends one.
+`markest login` signs in with OAuth in your browser. On the site you choose what to allow, reading, writing or both, and the code comes back to a port on this machine.
+
+Over SSH, or on a Linux with no display, or with `--device`, it shows a short code instead. You type it at `marke.st/oauth/device` on any device, signed in there. Enter a code only at marke.st, and only if you started the sign-in yourself.
+
+The sign-in is kept in `sign-in.vault` in your settings folder, sealed as the keys are (see **Keys**). Its access token lasts an hour and is refreshed by itself. `markest logout` ends the sign-in on the site, so its tokens stop working everywhere, and forgets it here. You can also disconnect it from your account settings on marke.st.
+
+Where there is no secure store, signing in is refused unless `--insecure-storage` keeps the sign-in in a file only your account can read. Every later save then says so.
+
+**The order runs use.** Your sign-in comes first, then `MARKEST_API_KEY` (or `MARKEST_KEY`), then a key kept with `markest login --with-key < key.txt`. `MARKEST_AUTH=key` uses only a key, for instance a workspace's key while you are signed in. `MARKEST_AUTH=oauth` uses only the sign-in. `markest status` says which one is in use and where it is kept, and never shows it.
+
+**An API key** is for a machine where no one signs in, such as CI or a container. It is read from the environment, never a flag, so it stays out of your shell history. Give it the permissions the commands need: `create_paste` to publish and change, `read_own` to read and update, `list_own` to list, `delete_own` to delete and prune.
+
+No key or token is ever printed, and each is taken out of every message. `read` and `pull` need no credential for a public or unlisted artifact, or for a private one shared by a signed link. `draft` never sends one.
 
 ## Encrypted end to end
 
@@ -61,7 +76,18 @@ An artifact is named by its id or by any of its addresses. `markest help <comman
 
 ## Keys
 
-The keys of encrypted artifacts are kept in one file in your account's settings folder — `%APPDATA%\markest\keys.json` on Windows, `~/Library/Application Support/markest/keys.json` on a Mac, `$XDG_CONFIG_HOME/markest/keys.json` or `~/.config/markest/keys.json` elsewhere — or where `MARKEST_KEYRING` says. It is readable by you alone where the system has file modes; on Windows your profile folder's permissions protect it.
+The keys of encrypted artifacts are kept in `keys.vault` in your account's settings folder: `%APPDATA%\markest` on Windows, `~/Library/Application Support/markest` on a Mac, `$XDG_CONFIG_HOME/markest` or `~/.config/markest` elsewhere, or the folder `MARKEST_HOME` names.
+
+The file is encrypted (AES-256-GCM) under a random key that only your system's secret store holds:
+- on a Mac, the login Keychain;
+- on Linux, the Secret Service (GNOME Keyring or KWallet, through `secret-tool`);
+- on Windows, the Data Protection API, which only your Windows account can open.
+
+A copy of the folder opens nothing on its own.
+
+Where no secure store can be used, such as a server with no desktop keyring, keys are not kept and the link still holds each one, unless you choose a plain file only your account can read: `markest login --insecure-storage`, or `MARKEST_SECRET_STORE=file` for a container. A version before 0.3.0 kept keys in `keys.json` in the clear. They move into the vault the first time it can be used, and that file is then removed.
+
+If the secret store loses the key, for example when an administrator resets your Windows password, the vault can no longer be opened. The links still hold each artifact's key.
 
 ```bash
 markest keys                           # the artifacts whose keys are kept — never the keys
@@ -77,10 +103,11 @@ The Markest connector your agent may already use cannot open encrypted artifacts
 
 ```bash
 # Claude Code
-claude mcp add markest-sealed -e MARKEST_API_KEY=mk_live_… -- markest mcp
+claude mcp add markest-sealed -- markest mcp                          # once you have run markest login
+claude mcp add markest-sealed -e MARKEST_API_KEY=mk_live_… -- markest mcp   # or with a key
 ```
 
-For Claude Desktop, Cursor, VS Code or Codex, add a stdio server whose command is `markest` (or `node /path/to/bin/markest.mjs`) with the argument `mcp`, and `MARKEST_API_KEY` in its environment. It speaks the MCP revisions 2025-06-18, 2025-03-26 and 2024-11-05.
+For Claude Desktop, Cursor, VS Code or Codex, add a stdio server whose command is `markest` (or `node /path/to/bin/markest.mjs`) with the argument `mcp`. It acts as your sign-in; where you do not sign in, put `MARKEST_API_KEY` in its environment. It speaks the MCP revisions 2025-06-18, 2025-03-26 and 2024-11-05.
 
 **What it cannot avoid:** text an agent reads or writes through these tools passes through its conversation, so the company running the agent's model sees it. Markest never does. Each tool says so to the agent.
 

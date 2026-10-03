@@ -32,11 +32,17 @@ export function artifactsFrom(references, { usage, min = 1, max = 1 }) {
     return { ids };
 }
 
-/** The clients one run speaks to the site with. */
+/** Whether a run speaks to the site as an account: signed in, or with an API key. */
+export function hasCredential(ctx) {
+    return Boolean(ctx.auth?.present || ctx.key);
+}
+
+/** The clients one run speaks to the site with, carrying its sign-in or its key. */
 export function clientsFor(ctx) {
     const rest = createClient({
         baseUrl: ctx.baseUrl,
         key: ctx.key ?? '',
+        auth: ctx.auth?.present ? ctx.auth : null,
         fetch: ctx.fetch,
         version: ctx.version,
         onWait: ({ status, ms }) => ctx.stderr.write('The site asked to wait (' + status + '); trying again in ' + Math.round(ms / 1000) + ' s.\n'),

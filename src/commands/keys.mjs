@@ -12,7 +12,7 @@
  *               cli/sealed/keyring, cli/sealed/sealing, cli/reading/artifact-source
  */
 
-import { answer, clientsFor, Refused, when } from '../core/command-kit.mjs';
+import { answer, clientsFor, Refused, when, hasCredential } from '../core/command-kit.mjs';
 import { pasteIdFrom } from '../core/site-args.mjs';
 import { printable, table } from '../core/output.mjs';
 import { keyringFor } from '../sealed/keyring.mjs';
@@ -32,8 +32,10 @@ Usage:
   markest keys --add <link>       Keep the key in a link (opened first)
   markest keys --forget <artifact>
 
-Keys are kept in your account's settings folder, or the file MARKEST_KEYRING
-names, readable by you alone. Whoever holds a key reads its artifact.
+Keys are kept in your account's settings folder (or the folder MARKEST_HOME
+names), sealed under a key your system's secret store holds: the Keychain,
+the Secret Service, or Windows' Data Protection API. Whoever holds a key
+reads its artifact.
 `,
     flags: { add: { type: 'string' }, forget: { type: 'string' } },
     parse(values, positionals) {
@@ -76,7 +78,7 @@ names, readable by you alone. Whoever holds a key reads its artifact.
         return answer(ctx, async () => {
             // Opened first: a key that does not open it is never kept
             const { rest } = clientsFor(ctx);
-            const artifact = await fetchArtifact(rest, { id: ctx.id, reference: ctx.reference, keyed: ctx.key !== '', pick: ALL });
+            const artifact = await fetchArtifact(rest, { id: ctx.id, reference: ctx.reference, keyed: hasCredential(ctx), pick: ALL });
             if (!artifact.sealed) throw new Refused('That artifact is not encrypted end to end: it needs no key.');
             await openAll(ctx.artifactKey, artifact.documents);
             await keyring.remember(ctx.baseUrl, ctx.id, ctx.artifactKey, artifact.title);

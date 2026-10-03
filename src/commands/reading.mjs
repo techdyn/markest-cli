@@ -13,7 +13,7 @@
  *               cli/reading/folder-writer, cli/reading/sealed-reading
  */
 
-import { answer, artifactsFrom, clientsFor, Refused } from '../core/command-kit.mjs';
+import { answer, artifactsFrom, clientsFor, Refused, hasCredential } from '../core/command-kit.mjs';
 import { EXIT, jsonLine, printable } from '../core/output.mjs';
 import { ALL, OPENING, chooseDocument, fetchArtifact, pathIn } from '../reading/artifact-source.mjs';
 import { writeDocuments } from '../reading/folder-writer.mjs';
@@ -24,7 +24,7 @@ const FORMATS = ['stored', 'markdown'];
 /** The artifact as the site hands it over, opened where it is encrypted end to end. */
 async function readArtifact(ctx, pick) {
     const { rest } = clientsFor(ctx);
-    const artifact = await fetchArtifact(rest, { id: ctx.ids[0], reference: ctx.reference, keyed: ctx.key !== '', format: ctx.format, pick });
+    const artifact = await fetchArtifact(rest, { id: ctx.ids[0], reference: ctx.reference, keyed: hasCredential(ctx), format: ctx.format, pick });
     return openIfSealed(artifact, ctx);
 }
 
@@ -39,8 +39,9 @@ Usage:
 
 The artifact is its id or any of its addresses; a document in the address
 opens unless <path> names another, else the one the artifact opens on.
-With MARKEST_API_KEY set, it reads what your key may; without, it reads
-as a browser would, so a public, unlisted or signed link needs no account.
+Signed in (markest login) or with MARKEST_API_KEY set, it reads what your
+account may; without, it reads as a browser would, so a public, unlisted or
+signed link needs no account.
 An artifact encrypted end to end is opened with the key in its link, or
 the one this machine keeps for it (markest keys).
 
@@ -62,8 +63,8 @@ Options:
     // Stryker disable next-line ArrowFunction: equivalent - nothing is no key needed, as false is
     needsKey: () => false,
     async run(ctx) {
-        if (ctx.format === 'markdown' && ctx.key === '') {
-            ctx.stderr.write('markest: --format markdown needs MARKEST_API_KEY: the site converts a document for a key.\n');
+        if (ctx.format === 'markdown' && !hasCredential(ctx)) {
+            ctx.stderr.write('markest: --format markdown needs you signed in (markest login) or MARKEST_API_KEY: the site converts a document for an account.\n');
             return EXIT.USAGE;
         }
         return answer(ctx, async () => {

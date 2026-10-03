@@ -74,7 +74,7 @@ test('what images refuses is said exactly and nothing is sent: an extension that
             [[paste.id, '--remove', 'img1'], '"img1" is not an image id: markest images <artifact> lists them'],
             [[paste.id, '--remove', 'X' + ID], '"X' + ID + '" is not an image id: markest images <artifact> lists them'],
             [[paste.id, '--remove', ID + 'X'], '"' + ID + 'X" is not an image id: markest images <artifact> lists them'],
-            [[paste.id], 'Set MARKEST_API_KEY to an API key from your account settings.', {}],
+            [[paste.id], 'Sign in with markest login, or set MARKEST_API_KEY to an API key from your account settings.', {}],
         ]) {
             const out = await markest(['images', ...argv], env ? { env } : {});
             assert.equal(out.code, 2, argv.join(' '));

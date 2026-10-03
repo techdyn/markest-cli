@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0 — 2026-10-02
+
+### Fixed
+- If browser sign-in cannot start its local listener, the command now stops promptly with the error instead of keeping a five-minute wait alive.
+
+### New
+- **`markest login`** signs in with OAuth in your browser, choosing on the site what to allow. Over SSH, on a Linux with no display, or with `--device`, it shows a code to type at marke.st instead. `--with-key` keeps an API key, read from stdin and checked with the site first.
+- **`markest logout`** ends the sign-in on the site and forgets it here. **`markest status`** says which credential the commands use and where it is kept.
+- Commands use your sign-in first, then `MARKEST_API_KEY`, then a kept key; `MARKEST_AUTH=key` or `MARKEST_AUTH=oauth` chooses one. The access token is refreshed by itself.
+
+### Changed
+- **What the command keeps is encrypted:** the sign-in and the keys of encrypted artifacts are sealed under a key only your system's secret store holds, the Keychain, the Secret Service or Windows' Data Protection API.
+  - Keys kept in `keys.json` by 0.2.0 move into `keys.vault` and that file is removed.
+  - Where no secure store can be used, nothing is kept unless `--insecure-storage` (or `MARKEST_SECRET_STORE=file`) chooses a file only your account can read.
+- `MARKEST_HOME` names the folder for everything the command keeps, replacing `MARKEST_KEYRING`.
+- `markest mcp` acts as your sign-in, so an agent client needs no key in its configuration.
+
 ## 0.2.0 — 2026-10-01
 
 ### New

@@ -74,7 +74,7 @@ test('grep refuses a wrong number or too many artifacts in so many words, and do
         }
         const noKey = await markest(['grep', 'a'], { env: {} });
         assert.equal(noKey.code, 2);
-        assert.equal(noKey.stderr, 'markest: Set MARKEST_API_KEY to an API key from your account settings.' + AGAIN);
+        assert.equal(noKey.stderr, 'markest: Sign in with markest login, or set MARKEST_API_KEY to an API key from your account settings.' + AGAIN);
         assert.equal(site.requests.length, 0, 'nothing is sent');
     } finally {
         await site.close();

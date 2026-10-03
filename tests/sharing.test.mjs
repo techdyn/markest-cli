@@ -151,7 +151,7 @@ test('a usage error says what is wrong in the command\'s own words, before a key
 test('what the agent tools answer needs a key, and nothing is asked without one', async () => {
     await withSite({}, async (site) => {
         for (const argv of [['collaborators', ID], ['fork', ID], ['views', ID], ['preview', ID]]) {
-            assert.deepEqual(await run([...argv, '--url', site.url], {}), { code: 2, stdout: '', stderr: 'markest: Set MARKEST_API_KEY to an API key from your account settings.\nRun markest --help for the commands.\n' }, argv[0]);
+            assert.deepEqual(await run([...argv, '--url', site.url], {}), { code: 2, stdout: '', stderr: 'markest: Sign in with markest login, or set MARKEST_API_KEY to an API key from your account settings.\nRun markest --help for the commands.\n' }, argv[0]);
         }
         assert.equal(site.requests.length, 0);
     });

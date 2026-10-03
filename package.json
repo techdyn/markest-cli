@@ -1,6 +1,6 @@
 {
   "name": "markest-cli",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Publish, read and manage Markest artifacts from the command line, including artifacts encrypted end to end",
   "keywords": [

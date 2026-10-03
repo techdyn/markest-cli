@@ -6,7 +6,8 @@
  *              mutant runs a few seconds of tests rather than the whole suite -
  *              the narrowing TICP asks for. The scores are then held to their
  *              thresholds: every critical module - the keys, sealing, what is
- *              written to disk, what keeps a key out of a message - at least 80,
+ *              written to disk, what keeps a key out of a message, the sign-in
+ *              and the vault that keeps it - at least 80,
  *              every other module at least 60, and the package as a whole at
  *              least 60. A group named on the command line runs alone; the
  *              reports are in reports/mutation/. Each mutant's tests end
@@ -43,12 +44,24 @@ export const GROUPS = {
         tests: ['artifacts', 'settings', 'images', 'history', 'conversation', 'sharing', 'search', 'tools', 'draft', 'registry'],
     },
     mcp: { mutate: ['src/mcp/*.mjs', 'src/commands/mcp.mjs'], tests: ['json-rpc', 'stdio', 'sealed-tools', 'mcp', 'registry'] },
+    // Signing in, and what the command keeps (D-20261002-03, D-20261002-04)
+    auth: {
+        mutate: ['src/auth/*.mjs', 'src/commands/auth.mjs'],
+        tests: ['oauth', 'loopback', 'browser', 'sign-in-store', 'credential', 'auth', 'api-client', 'regression/signed-in-publish', 'registry'],
+    },
+    store: {
+        mutate: ['src/store/*.mjs'],
+        tests: ['settings-folder', 'private-file', 'secret-store', 'vault', 'file-lock', 'keyring', 'sign-in-store', 'credential', 'auth'],
+    },
 };
 
 /** Modules whose mistakes cost a key, a secret, or a file: held to 80. */
 export const CRITICAL = [
     'src/sealed/keyring.mjs', 'src/sealed/sealing.mjs', 'src/sealed/sealed-artifacts.mjs', 'src/sealed/link-key.mjs', 'src/publish/sealed-publish.mjs',
     'src/reading/sealed-reading.mjs', 'src/reading/folder-writer.mjs', 'src/core/api-client.mjs', 'src/publish/secret-guard.mjs',
+    // A sign-in's tokens, and the key that seals everything kept
+    'src/auth/oauth.mjs', 'src/auth/loopback.mjs', 'src/auth/credential.mjs', 'src/auth/sign-in-store.mjs',
+    'src/store/vault.mjs', 'src/store/secret-store.mjs', 'src/store/private-file.mjs',
 ];
 export const CRITICAL_MIN = 80;
 export const OVERALL_MIN = 60;
