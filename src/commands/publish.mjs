@@ -122,7 +122,7 @@ export async function run({ folder, options, key, auth, vault, baseUrl, env, std
     const ignoreLines = [...await readIgnoreLines(folder), ...options.ignore];
     const scan = await scanFolder(folder, { ignoreLines, includeOutput: options.includeOutput, allowFiles: options.allowFiles });
     const log = (line) => stderr.write(line + '\n');
-    // The run's sign-in, or its key, as every command's client carries it (D-20261002-04)
+    // The run's sign-in, or its key, as every command's client carries it
     const client = createClient({
         baseUrl,
         key,

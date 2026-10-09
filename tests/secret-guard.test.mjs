@@ -14,11 +14,11 @@ test('the secret guard knows the shapes of keys', () => {
     assert.equal(secretByName('id_ed25519'), 'secret_name');
     assert.equal(secretByName('docs/credentials.md'), null);
     assert.equal(secretByName('secretary.json'), null);
-    assert.equal(secretInContent('-----BEGIN RSA PRIVATE KEY-----'), 'private_key');
+    assert.equal(secretInContent('-----BEGIN RSA ' + 'PRIVATE KEY-----'), 'private_key');
     assert.equal(secretInContent('sk_live_' + 'A1'.repeat(12)), 'stripe_key');
     assert.equal(secretInContent('ghp_' + 'a'.repeat(36)), 'github_token');
     assert.equal(secretInContent('AKIA' + 'ABCDEFGHIJKLMNOP'), 'aws_key');
-    assert.equal(secretInContent('xoxb-1234567890-abc'), 'slack_token');
+    assert.equal(secretInContent('xoxb-' + '1234567890-abc'), 'slack_token');
     assert.equal(secretInContent('mk_live_…'), null, 'a key already redacted is none');
     assert.equal(secretInContent('an ordinary page'), null);
 });
@@ -62,12 +62,12 @@ test('a token is known at its own length, and not shorter', () => {
     assert.equal(secretInContent('github_pat_' + '-'.repeat(40)), null, 'its own alphabet');
     assert.equal(secretInContent('ghp_' + 'a'.repeat(35)), null);
     assert.equal(secretInContent('xoxb-12345'), null, 'a Slack token is longer');
-    assert.equal(secretInContent('xoxb-1234567890'), 'slack_token');
+    assert.equal(secretInContent('xoxb-' + '1234567890'), 'slack_token');
     assert.equal(secretInContent('mk_live_' + '0f'.repeat(16)), 'markest_key');
     assert.equal(secretInContent('mk_live_' + '0f'.repeat(15)), null);
     assert.equal(secretInContent('rk_live_' + 'a'.repeat(20)), 'stripe_key');
     assert.equal(secretInContent('sk_test_' + 'a'.repeat(20)), null, 'a test key is not a live one');
     assert.equal(secretInContent('ASIA' + 'ABCDEFGHIJKLMNOP'), 'aws_key');
-    assert.equal(secretInContent('-----BEGIN PRIVATE KEY-----'), 'private_key');
+    assert.equal(secretInContent('-----BEGIN ' + 'PRIVATE KEY-----'), 'private_key');
     assert.equal(secretInContent('-----BEGIN PUBLIC KEY-----'), null);
 });

@@ -2,11 +2,11 @@
  * @module cli/publish/publish-run
  * @description A publish, request by request. A new artifact is one create
  *              carrying every document, then each image the documents show as
- *              its own bytes (D-20260925-01), then one overwrite of the documents
+ *              its own bytes, then one overwrite of the documents
  *              that show them, pointed at the addresses the uploads answered. A
  *              public one with images is created unlisted and published last,
  *              through the one visibility door, so a confirmation covers the
- *              finished artifact (D-20260913-09). An artifact already there is
+ *              finished artifact. An artifact already there is
  *              read, its images listed - which also proves it is the caller's -
  *              and only what changed is sent: new images, then added and changed
  *              documents in one overwrite; documents gone from the folder are

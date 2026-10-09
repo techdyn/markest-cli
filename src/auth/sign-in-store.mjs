@@ -1,7 +1,7 @@
 /**
  * @module cli/auth/sign-in-store
  * @description What this machine keeps of each site it is signed in to, in the
- *              command's vault (`sign-in.vault`, D-20261002-03): the OAuth
+ *              command's vault (`sign-in.vault`): the OAuth
  *              sign-in - its tokens, when the access token lapses, what it was
  *              allowed, when it was made - and an API key kept with
  *              `markest login --with-key`. Nothing here opens the vault, or asks

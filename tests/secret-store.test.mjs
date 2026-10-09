@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-03): the vault's key is kept in the system's
+ * Regression test: the vault's key is kept in the system's
  * own store for secrets (cli/store/secret-store) - DPAPI on Windows, the
  * Keychain on a Mac, the Secret Service on Linux - each reached by its own
  * program at its own path, never a shell, the key on stdin and never in an

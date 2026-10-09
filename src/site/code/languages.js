@@ -6,7 +6,7 @@
  *              reads on the server, so both give the same answer for every name
  *              (tests/fixtures/code-language-cases.json holds them to it). A whole
  *              file name (Makefile, CMakeLists.txt) is looked up before the
- *              extension (D-20260915-19).
+ *              extension.
  *
  * @input A document path, or a language id or alias
  * @output A highlight.js language id or null; display names; the languages one embeds

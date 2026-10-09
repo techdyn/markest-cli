@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261001-03): an artifact's documents written into a
+ * Regression test: an artifact's documents written into a
  * folder (cli/reading/folder-writer). A path comes from the site, so it is held
  * to the site's rules and to the folder: nothing lands outside it or goes
  * through a link, nothing already there is replaced without force, and one bad

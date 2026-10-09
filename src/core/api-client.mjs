@@ -2,7 +2,7 @@
  * @module cli/api-client
  * @description The tool's requests to the site. Each carries the run's
  *              credential as a Bearer token - the sign-in's access token, or the
- *              key (D-20261002-04) - and one made with none carries none; a
+ *              key - and one made with none carries none; a
  *              sign-in's token the site refuses with 401 is refreshed once and
  *              the request asked again. No redirect is followed, so a
  *              credential never goes to another address. A 429 waits as long as `Retry-After` asks (5 s

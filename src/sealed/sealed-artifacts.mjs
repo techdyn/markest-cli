@@ -1,7 +1,7 @@
 /**
  * @module cli/sealed/sealed-artifacts
  * @description What an agent asks of artifacts encrypted end to end, done on
- *              this machine (D-20261001-01): make one from documents given as
+ *              this machine: make one from documents given as
  *              text, read one, add or replace documents in one, take documents
  *              out, give its link. Every document is sealed here with the site's
  *              own sealing and its type sent beside it; the site gets envelopes

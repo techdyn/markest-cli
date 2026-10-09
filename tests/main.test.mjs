@@ -64,7 +64,7 @@ test('help says what there is, and more about one command', async () => {
     const general = await run([]);
     assert.equal(general.code, 0);
     assert.equal(general.stdout, generalHelp());
-    // Signing in first, then publishing (D-20261002-04)
+    // Signing in first, then publishing
     assert.match(general.stdout, /Commands:\n {2}login +Sign in to Markest/);
     assert.match(general.stdout, /\n {2}status +.*\n {2}publish +Publish a folder/);
     for (const [name, command] of COMMANDS) assert.match(general.stdout, new RegExp('\\n  ' + name + ' +' + command.summary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\n'), name + ' is listed with its summary');
@@ -101,7 +101,7 @@ test('what goes wrong unforeseen is said without the key, and exits 1', async ()
     }
 });
 
-// The run's credential, as main hands it on (D-20261002-04)
+// The run's credential, as main hands it on
 
 const RECORD = { access_token: 'eyJsignedin.token.here', refresh_token: 'refresh-kept', expires_at: Date.now() + 3600000, scope: 'pastes.read', signed_in_at: '2026-10-02T09:00:00.000Z' };
 

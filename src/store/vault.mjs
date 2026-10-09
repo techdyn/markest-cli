@@ -2,8 +2,8 @@
  * @module cli/store/vault
  * @description The command's files of secrets - its sign-in, the keys of
  *              artifacts encrypted end to end - each sealed with AES-256-GCM
- *              under one random key that only the system's secret store holds
- *              (D-20261002-03), so a copy of the settings folder opens nothing.
+ *              under one random key that only the system's secret store holds,
+ *              so a copy of the settings folder opens nothing.
  *              Each file is bound to what it is (`sign-in`, `keys`), so one
  *              cannot be passed off as the other. The key is made the first
  *              time something is written, and read once a run. A file whose

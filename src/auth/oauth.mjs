@@ -1,13 +1,13 @@
 /**
  * @module cli/auth/oauth
- * @description The command's side of signing in to Markest over OAuth 2.1
- *              (D-20261002-04): it is the client Markest publishes a document
+ * @description The command's side of signing in to Markest over OAuth 2.1:
+ *              it is the client Markest publishes a document
  *              for (`markest-cli`), asks for the agent tools and the REST API at
- *              once - `resource` once for each (RFC 8707, D-20261002-01) - with
+ *              once - `resource` once for each (RFC 8707) - with
  *              both scopes, and proves each code with PKCE (S256). A code comes
  *              back to a port on this machine; where no browser opens, a code is
  *              shown for its person to type at marke.st and the site is asked
- *              until it is (RFC 8628, D-20261002-02). Tokens are refreshed, and
+ *              until it is (RFC 8628). Tokens are refreshed, and
  *              a sign-in is ended on the site (RFC 7009). Every request is a
  *              form, follows no redirect, and is said back without a token.
  *

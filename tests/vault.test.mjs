@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-03): the command's files of secrets
+ * Regression test: the command's files of secrets
  * (cli/store/vault) - sealed with AES-256-GCM under one key only the secret
  * store holds, each bound to what it is, the key made on the first write and
  * read once a run, and a file whose key is gone said to be unopenable and never
@@ -130,7 +130,7 @@ test('a run\'s vault is opened once, in its settings folder, with the store chos
     await assert.rejects(vaultFor({ env: { MARKEST_HOME: home, MARKEST_SECRET_STORE: 'dpapi' } }).open(), /MARKEST_SECRET_STORE is file, or not set/);
 });
 
-test('kept in the plain file because --insecure-storage chose it, every save says so; MARKEST_SECRET_STORE=file is not reminded (D-20261002-03)', async () => {
+test('kept in the plain file because --insecure-storage chose it, every save says so; MARKEST_SECRET_STORE=file is not reminded', async () => {
     const { vaultFor } = await import('../src/store/vault.mjs');
     const { PLAIN_KEY_FILE, choosePlainFile } = await import('../src/store/secret-store.mjs');
     const home = await folder();

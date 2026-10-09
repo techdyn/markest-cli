@@ -3,11 +3,11 @@
  * @description `markest mcp`: a Model Context Protocol server on stdio, for an
  *              agent client to start - Claude Code, Claude Desktop, Cursor,
  *              Codex, VS Code - offering the tools for artifacts encrypted end to
- *              end alone (D-20261001-01), beside the remote Markest connector,
+ *              end alone, beside the remote Markest connector,
  *              which offers the rest. Its stdout is the protocol's and nothing
  *              else's; it acts as the account signed in with markest login, else
  *              the API key in MARKEST_API_KEY, on the site MARKEST_URL names, from
- *              the environment the client starts it with (D-20261002-04).
+ *              the environment the client starts it with.
  *
  * @input A run's context; JSON-RPC on stdin
  * @output JSON-RPC on stdout; exit 0 when stdin ends

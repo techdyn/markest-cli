@@ -17,7 +17,7 @@ export function ignoredFolder(path) {
     return GENERATED.has(name) ? 'generated' : null;
 }
 
-/** A folder that usually holds generated output, which is read only when asked for (D-20260918-03). */
+/** A folder that usually holds generated output, which is read only when asked for. */
 export function reviewFolder(path) {
     return REVIEW.has(path.split('/').at(-1).toLowerCase()) ? 'output' : null;
 }

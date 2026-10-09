@@ -2,7 +2,7 @@
  * @module cli/store/secret-store
  * @description Where the one key that opens the command's vault is kept: the
  *              system's own store for secrets, never a file of ours in the
- *              clear (D-20261002-03). On Windows, the Data Protection API under
+ *              clear. On Windows, the Data Protection API under
  *              the account (the key kept in a file only that account's login
  *              opens); on a Mac, the login Keychain, through `security`; on
  *              Linux, the Secret Service - GNOME Keyring, KWallet - through

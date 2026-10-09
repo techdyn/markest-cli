@@ -34,7 +34,7 @@ const STRUCTURAL_TAGS = new Set([
 /** Content type implied by a recognised file name or extension, or null. */
 export function detectByExtension(path) {
     // A name that means code - by its extension, or whole, as Makefile does -
-    // never collides with the markdown or HTML extensions (D-20260915-19).
+    // never collides with the markdown or HTML extensions.
     if (languageForPath(path) !== null) return TYPE_CODE;
     const ext = extensionOf(path);
     if (ext === '') return null;

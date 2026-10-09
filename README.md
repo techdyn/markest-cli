@@ -9,7 +9,13 @@ markest publish ./notes --sealed           # encrypted end to end; the address c
 markest read https://marke.st/p/01J…#key=… # opens it again, here
 ```
 
-It needs Node 20.19 or later and has no dependencies. Until it is on npm, run it from a checkout with `node bin/markest.mjs`, or `npm link` to put `markest` on your PATH.
+It needs Node 20.19 or later and has no dependencies. Install it from GitHub:
+
+```bash
+npm install -g github:techdyn/markest-cli
+```
+
+or run it from a checkout with `node bin/markest.mjs`, or `npm link` there to put `markest` on your PATH.
 
 ## Commands
 

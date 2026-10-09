@@ -101,7 +101,7 @@ test('the clients of a run carry its key, or none, and say on stderr when the si
     }
 });
 
-test('a run has a credential when it is signed in or has a key (D-20261002-04)', async () => {
+test('a run has a credential when it is signed in or has a key', async () => {
     const { hasCredential } = await import('../src/core/command-kit.mjs');
     assert.equal(hasCredential({}), false);
     assert.equal(hasCredential({ key: '' }), false);

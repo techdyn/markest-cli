@@ -1,7 +1,7 @@
 /**
  * @module cli/mcp/sealed-tools
  * @description The tools `markest mcp` offers an agent, for artifacts
- *              encrypted end to end alone (D-20261001-01): make one, read one,
+ *              encrypted end to end alone: make one, read one,
  *              add or replace documents, take documents out, give its link, keep
  *              its key. Every other Markest tool stays on the remote connector,
  *              which cannot open these. Each is named apart from the remote

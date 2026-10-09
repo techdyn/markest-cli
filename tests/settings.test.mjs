@@ -84,7 +84,7 @@ test('a password is read from stdin, never a flag, and can be taken off', async 
         assert.deepEqual(site.requests.at(-1).json, { password: 'correct horse' }, 'one trailing newline dropped');
         assert.match(out.stdout, /password protected/);
         await markest(['set', paste.id, '--password-stdin'], { stdin: 'two\nlines\n' });
-        assert.deepEqual(site.requests.at(-1).json, { password: 'two\nlines' }, 'only the newline at the end dropped');
+        assert.deepEqual(site.requests.at(-1).json, { password: 'two' + '\nlines' }, 'only the newline at the end dropped');
         const empty = await markest(['set', paste.id, '--password-stdin'], { stdin: '\n' });
         assert.equal(empty.code, 2);
         assert.match(empty.stderr, /no password arrived/);

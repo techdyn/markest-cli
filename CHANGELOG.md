@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — 2026-10-09
+
+### Changed
+- The README says how to install the command from GitHub: `npm install -g github:techdyn/markest-cli`.
+- Comments and test names no longer refer to records outside this repository.
+
 ## 0.3.0 — 2026-10-02
 
 ### Fixed

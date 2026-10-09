@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-04): signing in from the command line
+ * Regression test: signing in from the command line
  * (cli/commands/auth) - in the browser with the code handed back to a port
  * here, or with a code typed at the site where no browser opens; an API key
  * kept instead only once the site takes it; nothing kept where no secure store

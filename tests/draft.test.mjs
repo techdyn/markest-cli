@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261001-03): `markest draft` against the fake site
+ * Regression test: `markest draft` against the fake site
  * (cli/commands/draft). A file or a small folder is published with no
  * credential, even when a key is set; what a draft cannot hold is refused with
  * nothing sent; the claim link goes to stderr.

@@ -3,7 +3,7 @@
  * @description Whether a browser can be opened from here, and opening one at an
  *              address. Not over SSH - the browser would open on the other
  *              machine, or nowhere - and not on a Linux with no display; there,
- *              signing in uses a code instead (D-20261002-02). The browser is
+ *              signing in uses a code instead. The browser is
  *              opened by the system's own handler, never through a shell, so an
  *              address's `&` is not read as anything.
  *

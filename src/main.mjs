@@ -3,7 +3,7 @@
  * @description `markest <command>` from start to finish: find the command, read
  *              its flags beside the ones every command takes, the site, the
  *              run's vault and its credential - the sign-in, else an API key
- *              (D-20261002-04) - run it, and return its exit code. `markest`,
+ *              - run it, and return its exit code. `markest`,
  *              `--help` and `markest help <command>` say what there is;
  *              `--version` the version. Anything unforeseen is reported without
  *              a key or token and exits 1.

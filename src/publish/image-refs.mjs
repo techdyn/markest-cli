@@ -11,7 +11,7 @@
  *              from the document's folder, or from the root after a leading `/` - but one
  *              climbing out of the folder resolves to nothing. Rewriting swaps
  *              the whole destination, query and fragment too, for the relative
- *              `/img/...` path the upload answered (D-20260916-09), only ever a
+ *              `/img/...` path the upload answered, only ever a
  *              plain path, and leaves every other byte as it was. What cannot work on the site is said
  *              instead of rewritten: a markdown link to an image, a stylesheet
  *              or script beside an HTML page, a link from one HTML page to

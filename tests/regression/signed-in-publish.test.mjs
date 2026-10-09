@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-04): found by the live check of 2026-10-02 -
+ * Regression test: found by the live check of 2026-10-02 -
  * signed in with `markest login`, `markest publish` sent no credential at all
  * ("Missing API key"), because it built its own client from the API key alone
  * while every other command took the run's sign-in through clientsFor. A

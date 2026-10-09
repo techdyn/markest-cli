@@ -1,7 +1,7 @@
 /**
  * @module cli/commands/auth
- * @description `markest login`, `markest logout` and `markest status`
- *              (D-20261002-04). Signing in is OAuth by default: the browser on
+ * @description `markest login`, `markest logout` and `markest status`.
+ *              Signing in is OAuth by default: the browser on
  *              this machine, the code handed back to a port here; where no
  *              browser opens - over SSH, or a Linux with no display - or with
  *              `--device`, a code its person types at the site. An API key can

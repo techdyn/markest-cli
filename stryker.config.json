@@ -1,11 +1,11 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
-  "_comment": "Mutation testing (TICP 2.1). Each mutant runs the whole suite through node:test; the site's copied modules in src/site/ are the site's and are not mutated here. Thresholds: scripts/mutate.mjs holds each critical module (its CRITICAL list) to 80, every other module to 60, and the whole to 60.",
+  "_comment": "Mutation testing. Each mutant runs the whole suite through node:test; the site's copied modules in src/site/ are the site's and are not mutated here. Thresholds: scripts/mutate.mjs holds each critical module (its CRITICAL list) to 80, every other module to 60, and the whole to 60.",
   "testRunner": "command",
   "commandRunner": {
     "command": "node --test --test-timeout=10000 --test-force-exit \"tests/**/*.test.mjs\""
   },
-  "_comment_hangs": "A run must end itself (TICP 2.1, rule 7): --test-timeout cancels a hung test and --test-force-exit exits past open handles, because on Windows Stryker's kill of a timed-out run can fail and leave its process tree behind (229 processes, 25 GB on 2026-10-01). timeoutMS sits above the test timeout so the run ends itself first; concurrency is held to 4 to keep memory headroom.",
+  "_comment_hangs": "A run must end itself: --test-timeout cancels a hung test and --test-force-exit exits past open handles, because on Windows Stryker's kill of a timed-out run can fail and leave its process tree behind (229 processes, 25 GB on 2026-10-01). timeoutMS sits above the test timeout so the run ends itself first; concurrency is held to 4 to keep memory headroom.",
   "mutate": ["src/**/*.mjs"],
   "coverageAnalysis": "off",
   "concurrency": 4,

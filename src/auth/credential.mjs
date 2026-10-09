@@ -1,6 +1,6 @@
 /**
  * @module cli/auth/credential
- * @description The credential a run speaks to the site with (D-20261002-04):
+ * @description The credential a run speaks to the site with:
  *              the OAuth sign-in kept for the site first, as the account holder
  *              asked; else an API key - MARKEST_API_KEY (or MARKEST_KEY), then
  *              one kept with `markest login --with-key`; else none.

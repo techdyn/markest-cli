@@ -1,8 +1,8 @@
 /**
  * @module cli/tests/support/fake-oauth
  * @description A stand-in for the site's OAuth server and one REST endpoint, on
- *              a real local port, behaving as the site's does (D-20261002-01,
- *              D-20261002-02): the consent screen answers with a code at once -
+ *              a real local port, behaving as the site's does:
+ *              the consent screen answers with a code at once -
  *              or a refusal, as the test says - each code once and only with its
  *              PKCE verifier, refresh tokens rotated and a retired one refused,
  *              a device code pending until the test allows or cancels it,

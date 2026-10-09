@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-04): the command's side of OAuth
+ * Regression test: the command's side of OAuth
  * (cli/auth/oauth) - the client Markest publishes for it, both places and both
  * scopes asked for, PKCE S256, every exchange a form that follows no redirect,
  * a refusal said with its OAuth code, a code waited for at the site's interval

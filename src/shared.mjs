@@ -5,11 +5,11 @@
  *              and an artifact is sealed exactly as the browser seals it, with
  *              nothing copied: which files are documents, what a path may be,
  *              which type a document is, how large it may be, which folders are
- *              never read, how long a server asks to be left alone (D-20260902-05,
- *              D-20260918-02, D-20260918-03), and the envelope, the key and the
- *              link that carries it (D-20260930-01, D-20261001-01). The release
+ *              never read, how long a server asks to be left alone,
+ *              and the envelope, the key and the
+ *              link that carries it. The release
  *              snapshot copies these modules beside the command and points this
- *              file at the copies (D-20261001-02).
+ *              file at the copies.
  *
  * @input None
  * @output Re-exports of the site's pure modules

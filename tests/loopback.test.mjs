@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-04): where the browser hands the code back
+ * Regression test: where the browser hands the code back
  * (cli/auth/loopback) - 127.0.0.1 alone, on a port the system gives, /callback
  * once, an answer to another sign-in turned away while the wait goes on, the
  * code taken only from the issuer that names itself, and nothing left

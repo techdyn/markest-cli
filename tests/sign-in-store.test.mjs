@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-03, D-20261002-04): what this machine keeps of
+ * Regression test: what this machine keeps of
  * each site it is signed in to (cli/auth/sign-in-store) - in the vault, by
  * site, a sign-in beside a kept key, the vault opened only when there is a
  * file, and the file gone once no site is left.

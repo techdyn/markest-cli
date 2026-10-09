@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-03): a file of the command's own
+ * Regression test: a file of the command's own
  * (cli/store/private-file) is written whole, readable by its owner alone, read
  * back as text or null, and removed saying whether it was there.
  */

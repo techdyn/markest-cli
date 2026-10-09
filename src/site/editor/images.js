@@ -4,8 +4,8 @@
  *              it goes in where the cursor is, the way the document shows images:
  *              markdown `![alt](url)`, an HTML `<img>`, or the bare address in code.
  *              One chosen in the Images popover is only uploaded; it goes into the
- *              text when Insert is pressed (D-20260917-01). On a saved paste an
- *              image is sent in pieces (editor/image-transfer, D-20260917-02), two
+ *              text when Insert is pressed. On a saved paste an
+ *              image is sent in pieces (editor/image-transfer), two
  *              at a time and the rest waiting their turn, each one announced to
  *              the upload list; a placed one holds its place with an `uploading:`
  *              address, becomes the image when it is stored, keeps its place while
@@ -14,7 +14,7 @@
  *              saved every image is held, listed in the popover and sent with the
  *              form that creates the paste unless it is removed first; a placed one
  *              waits as `pending-image:{key}`, which the server replaces with the
- *              image's address (D-20260915-20). An image over the limit, or a file
+ *              image's address. An image over the limit, or a file
  *              that is no image the store keeps, is refused before anything is sent.
  *
  * @input Files; the upload and delete addresses and token; the editor's insert and replace

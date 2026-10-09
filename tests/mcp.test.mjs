@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261001-01): `markest mcp` as an agent client runs it -
+ * Regression test: `markest mcp` as an agent client runs it -
  * a real process on stdio, against the fake site (cli/commands/mcp,
  * cli/mcp/sealed-tools). It initialises, lists the sealed tools alone, each
  * saying what the model provider sees; creates an artifact the site holds only
@@ -109,7 +109,7 @@ test('an agent client initialises it, creates an artifact sealed here, and reads
 test('it takes nothing on the command line, and says how a client starts it', async () => {
     assert.equal((await run(['mcp', 'extra'])).code, 2);
     const help = (await run(['help', 'mcp'])).stdout;
-    // Signed in, the client needs no key; a key is the other way (D-20261002-04)
+    // Signed in, the client needs no key; a key is the other way
     assert.match(help, /once you have run markest login:\n {2}claude mcp add markest-sealed -- markest mcp\n/);
     assert.match(help, /claude mcp add markest-sealed -e MARKEST_API_KEY=mk_live_\.\.\.\n-- markest mcp/);
 });

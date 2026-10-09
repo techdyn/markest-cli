@@ -2,7 +2,7 @@
  * @module chat/crypto/primitives
  * @description The chat's end-to-end encryption, as operations on keys and
  *              bytes - WebCrypto and nothing else, so the same code runs in a
- *              browser and under Node's tests (D-20260923-02).
+ *              browser and under Node's tests.
  *
  *              An account has one identity key pair (ECDH P-256). Its private
  *              half never reaches the site in the clear: it is sealed with a

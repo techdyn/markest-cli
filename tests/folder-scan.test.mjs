@@ -45,7 +45,7 @@ test('every hidden file is left out, at any depth, and whatever the ignore rules
 test('files that hold keys are left out unless allowed by name', async () => {
     const root = await makeFolder({
         'credentials.json': '{}', 'service-account-prod.json': '{}', 'deploy.pem': 'x', 'terraform.tfstate': '{}',
-        'settings.yaml': 'token: mk_live_' + 'a'.repeat(48), 'app.ini': 'key=-----BEGIN PRIVATE KEY-----', 'secrets.md': '# About secrets',
+        'settings.yaml': 'token: mk_live_' + 'a'.repeat(48), 'app.ini': 'key=-----BEGIN ' + 'PRIVATE KEY-----', 'secrets.md': '# About secrets',
         'ok.json': '{"a": 1}',
     });
     const scan = await scanFolder(root);

@@ -4,7 +4,7 @@
  *              document the artifact opens on and what it is called, the order
  *              of its documents, whether the folder fits the site's rules at all
  *              (the editor's own validation, with no document cap - that is the
- *              plan's, answered by the server, D-20260921-03), which images the
+ *              plan's, answered by the server), which images the
  *              documents show and so must go up, and, for an artifact already
  *              there, what was added, changed or removed. Requests are cut to a
  *              size a lost one costs little to repeat. Pure.

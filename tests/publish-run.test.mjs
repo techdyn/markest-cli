@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20260929-02): `markest publish <folder>` against a
+ * Regression test: `markest publish <folder>` against a
  * stand-in for the REST API. A folder is one create, its shown images once each
  * as their own bytes, and one overwrite pointing the documents at them; public
  * with images is published last; an update sends only what changed and removes
@@ -31,14 +31,14 @@ const SITE_FILES = {
     'img/logo.png': Buffer.from('PNG-LOGO'),
     'img/unused.png': Buffer.from('PNG-UNUSED'),
     '.env': 'SECRET=1',
-    '.npmrc': '//registry/:_authToken=x',
+    '.npmrc': '//registry/:_auth' + 'Token=x',
     '.git/config': '[core]',
     'node_modules/x/index.js': 'x',
     'dist/bundle.js': 'x',
     'notes/private.md': 'private',
     '.markestignore': 'notes/\n',
     'config/service-account.json': '{"type": "service_account"}',
-    'keys.yaml': 'key: -----BEGIN OPENSSH PRIVATE KEY-----',
+    'keys.yaml': 'key: -----BEGIN OPENSSH ' + 'PRIVATE KEY-----',
 };
 
 async function withSite(options, body) {

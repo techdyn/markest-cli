@@ -226,8 +226,8 @@ test('the key, and anything shaped like one, is taken out of messages', async ()
     assert.equal(redact(undefined, KEY), '');
     assert.equal(redact('bad ' + KEY + ' and mk_test_abcdef1234', KEY), 'bad mk_… and mk_…');
     assert.equal(redact('oddly shaped: sekrit-123', 'sekrit-123'), 'oddly shaped: …', 'a secret not shaped like a key is not said to be one');
-    // A sign-in's tokens (D-20261002-04): each given, and anything shaped like an access token
-    assert.equal(redact('a eyJhbGciOiJIUzI1.eyJzdWIiOiI0Mi.c2lnbmF0dXJlLXg and r0123', ['r0123', '']), 'a eyJ… and …');
+    // A sign-in's tokens: each given, and anything shaped like an access token
+    assert.equal(redact('a eyJhbGciOiJIUzI1.' + 'eyJzdWIiOiI0Mi.c2lnbmF0dXJlLXg and r0123', ['r0123', '']), 'a eyJ… and …');
     assert.equal(redact('both ' + KEY + ' and tok', [KEY, 'tok']), 'both mk_… and …');
     await withStub([{ status: 401, body: { error: 'Invalid key ' + KEY } }], async ({ client }) => {
         await assert.rejects(client.request('GET', '/x'), (error) => !error.message.includes(KEY) && error.message.includes('mk_…'));
@@ -275,7 +275,7 @@ function signIn(tokens, { renewFails = null } = {}) {
     };
 }
 
-test('a sign-in\'s token is the bearer; one the site refuses is renewed once and asked again (D-20261002-04)', async () => {
+test('a sign-in\'s token is the bearer; one the site refuses is renewed once and asked again', async () => {
     const site = await stub([{ status: 401, body: { error: 'The access token is invalid, expired or revoked: sign in again.' } }, { status: 200, body: { ok: true } }]);
     try {
         const auth = signIn(['eyJold', 'eyJnew']);

@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-04): one command at a time refreshes a sign-in
+ * Regression test: one command at a time refreshes a sign-in
  * (cli/store/file-lock) - the second waits for the first, a lock a dead command
  * left is taken after a while, and one held too long is said.
  */

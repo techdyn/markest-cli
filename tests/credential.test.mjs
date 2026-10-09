@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-04): the credential a run uses
+ * Regression test: the credential a run uses
  * (cli/auth/credential) - the sign-in first, then MARKEST_API_KEY, then a kept
  * key, MARKEST_AUTH choosing one; an access token refreshed before it lapses
  * or when refused, once, under a lock, taking another command's fresh tokens

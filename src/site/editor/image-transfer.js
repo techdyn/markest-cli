@@ -1,7 +1,7 @@
 /**
  * @module editor/image-transfer
- * @description One image on its way to a saved paste, sent in pieces
- *              (D-20260917-02). It opens a session, sends each piece at the
+ * @description One image on its way to a saved paste, sent in pieces.
+ *              It opens a session, sends each piece at the
  *              offset the server holds - reporting progress within a piece as
  *              well as between them - and ends as the stored image. Paused, it
  *              stops; resumed, it asks the server where it is and carries on from

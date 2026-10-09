@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-02): whether a browser can be opened from here
+ * Regression test: whether a browser can be opened from here
  * (cli/auth/browser) - never over SSH, never on a Linux with no display - and
  * opening one through the system's own handler, never a shell.
  */
@@ -49,7 +49,7 @@ test('the browser is started detached, with no shell, and whether it started is 
     assert.equal(await openBrowser('https://x', { platform: 'linux', start: () => { throw new Error('no'); } }), false);
 });
 
-test('no test can start the system\'s browser opener, whatever it is handed (the harness, D-20261002-04)', async () => {
+test('no test can start the system\'s browser opener, whatever it is handed (the harness)', async () => {
     const { spawn } = await import('node:child_process');
     // A path that is not on this machine, so a guard that failed would only fail this test
     assert.throws(() => spawn('/usr/bin/open', ['https://example.invalid']), /A test tried to open a browser with \/usr\/bin\/open\./);

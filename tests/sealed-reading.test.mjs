@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261001-01): an artifact encrypted end to end read on
+ * Regression test: an artifact encrypted end to end read on
  * this machine (cli/reading/sealed-reading, through `markest read` and `pull`):
  * opened with the key in its link or the one kept here, never sending the key
  * anywhere, kept only when asked, and refused - saying how to give one - when

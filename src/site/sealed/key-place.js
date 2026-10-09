@@ -1,7 +1,7 @@
 /**
  * @module sealed/key-place
  * @description Where the key of an artifact sealed in the browser is found and
- *              kept (D-20260930-01): in its link's fragment (`#key=…`), which
+ *              kept: in its link's fragment (`#key=…`), which
  *              no browser sends to the site; in this tab's session storage,
  *              once a reader has opened it here, so moving between its
  *              documents does not lose it; and, for whoever made it or edits

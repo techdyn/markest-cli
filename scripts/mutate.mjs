@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * @module cli/scripts/mutate
- * @description The package's mutation testing (TICP 2.1), with Stryker: each
+ * @description The package's mutation testing, with Stryker: each
  *              group of modules mutated against the tests that are its own, so a
- *              mutant runs a few seconds of tests rather than the whole suite -
- *              the narrowing TICP asks for. The scores are then held to their
+ *              mutant runs a few seconds of tests rather than the whole suite.
+ *              The scores are then held to their
  *              thresholds: every critical module - the keys, sealing, what is
  *              written to disk, what keeps a key out of a message, the sign-in
  *              and the vault that keeps it - at least 80,
@@ -44,7 +44,7 @@ export const GROUPS = {
         tests: ['artifacts', 'settings', 'images', 'history', 'conversation', 'sharing', 'search', 'tools', 'draft', 'registry'],
     },
     mcp: { mutate: ['src/mcp/*.mjs', 'src/commands/mcp.mjs'], tests: ['json-rpc', 'stdio', 'sealed-tools', 'mcp', 'registry'] },
-    // Signing in, and what the command keeps (D-20261002-03, D-20261002-04)
+    // Signing in, and what the command keeps
     auth: {
         mutate: ['src/auth/*.mjs', 'src/commands/auth.mjs'],
         tests: ['oauth', 'loopback', 'browser', 'sign-in-store', 'credential', 'auth', 'api-client', 'regression/signed-in-publish', 'registry'],
@@ -111,7 +111,7 @@ export function scoresOf(report) {
 
 const percent = (detected, total) => (total === 0 ? 100 : (detected * 100) / total);
 
-/** Which thresholds the scores miss: each module its own (TICP 2.1), and the whole. */
+/** Which thresholds the scores miss: each module its own, and the whole. */
 export function verdict(scores) {
     const misses = [];
     for (const [file, one] of Object.entries(scores)) {

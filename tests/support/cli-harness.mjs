@@ -40,7 +40,7 @@ export const KEY = 'mk_live_' + 'ab12'.repeat(12);
 /**
  * A settings folder of the tests' own, and the plain file for its vault's key:
  * no run reads or writes the account's real folder, Keychain, DPAPI file or
- * keyring (D-20261002-03).
+ * keyring.
  */
 export const TEST_HOME = join(tmpdir(), 'markest-cli-test-home-' + process.pid);
 

@@ -1,6 +1,6 @@
 /**
  * @module sealed/seal
- * @description Sealing an artifact's documents in the browser (D-20260930-01).
+ * @description Sealing an artifact's documents in the browser.
  *
  *              An artifact sealed in the browser has one key, 256 random bits,
  *              made in the browser of whoever creates it and never sent to the

@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261001-01): `markest publish --sealed` against the
+ * Regression test: `markest publish --sealed` against the
  * fake site (cli/publish/sealed-publish). Every document reaches the site as an
  * envelope with its type, the key never does; the address printed carries the
  * key, which is kept here the moment the artifact exists; an image shown stops

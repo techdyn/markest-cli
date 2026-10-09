@@ -574,7 +574,7 @@ export class DocumentStore {
     /** Plain records in saved order, with the effective content type. */
     /**
      * Every document replaced at once: a merge settled, or the newer version
-     * taken (D-20260929-11). The open document and the default stay where
+     * taken. The open document and the default stay where
      * their paths still are.
      */
     replaceAll(documents) {

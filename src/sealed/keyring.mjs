@@ -1,10 +1,10 @@
 /**
  * @module cli/sealed/keyring
  * @description The keys of artifacts encrypted end to end that this machine
- *              keeps, as the browser that makes or edits one keeps its key
- *              (D-20260930-01): so the owner's later reads and updates need
+ *              keeps, as the browser that makes or edits one keeps its key:
+ *              so the owner's later reads and updates need
  *              only the artifact's id. Kept by site and by artifact in the
- *              command's vault (`keys.vault`, D-20261002-03), sealed under the
+ *              command's vault (`keys.vault`), sealed under the
  *              key the system's secret store holds, so a copy of the settings
  *              folder opens no artifact. Only a key of the right shape is kept;
  *              a key is never sent anywhere from here, and a listing never

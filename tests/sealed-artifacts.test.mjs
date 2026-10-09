@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261001-01): what an agent asks of artifacts encrypted
+ * Regression test: what an agent asks of artifacts encrypted
  * end to end, done on this machine (cli/sealed/sealed-artifacts) against the
  * fake site: made from text as envelopes with their types, the key kept and
  * never sent; read whole or one document; documents added or replaced keeping

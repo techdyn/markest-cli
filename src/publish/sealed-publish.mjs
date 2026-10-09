@@ -1,6 +1,6 @@
 /**
  * @module cli/publish/sealed-publish
- * @description A folder published encrypted end to end (D-20261001-01): every
+ * @description A folder published encrypted end to end: every
  *              document sealed on this machine with a new key, as the browser
  *              seals one - bound to its path and type, the type sent beside it -
  *              and the site handed envelopes alone. It is never public, holds no

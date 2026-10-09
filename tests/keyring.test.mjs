@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261001-01, D-20261002-03): the keys this machine
+ * Regression test: the keys this machine
  * keeps for artifacts encrypted end to end (cli/sealed/keyring) - kept by site
  * and artifact in the vault, sealed, only a key of the right shape, listed
  * without the keys; the keys an earlier version kept in the clear moved into

@@ -1,5 +1,5 @@
 /**
- * REGRESSION ANCHOR (D-20261002-03): the command keeps its files in the
+ * Regression test: the command keeps its files in the
  * account's own settings folder on each system, or where MARKEST_HOME says
  * (cli/store/settings-folder).
  */
