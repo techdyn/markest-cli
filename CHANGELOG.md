@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0 — 2026-11-27
+
+### New
+- **`markest secret`** works with an artifact's secret slots: a markdown fence opened as ```` ```secret <name> ```` holds a credential the document needs and no reader sees.
+- **`markest secret list <artifact>`** shows each slot's name, its state (empty, held or sealed), whether agents may ask for its value, and its document. It never shows a value.
+- **`markest secret set <artifact> <name>`** fills a slot from an environment variable (`--env <VAR>`), a file (`--file <path>`) or piped standard input, so a credential goes into the artifact without being printed anywhere: not on success, not in an error, not with `--json`. It is the way to fill a slot an agent left empty without the value entering the agent's context.
+  - With **`--sealed`** the value is sealed on this machine with the key it keeps for the artifact (made and kept first when there is none), and the site only ever holds an envelope.
+- **`markest secret run <artifact> --env <VAR>=<name> -- <command>`** runs a command with secrets in its environment without showing them, and exits with the command's own exit code.
+  - A secret agents may only ask for waits for the person's approval with `--wait`.
+  - The command is started directly, never through a shell, and nothing runs unless every secret was handed over.
+  - Its output passes through a masker that replaces each value, and its base64 and URL-encoded forms, with `[secret]`. This guards against accidental display; a program that transforms a value can still show it.
+
 ## 0.3.1 — 2026-10-09
 
 ### Changed

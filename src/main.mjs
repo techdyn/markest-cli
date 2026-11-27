@@ -8,7 +8,7 @@
  *              `--version` the version. Anything unforeseen is reported without
  *              a key or token and exits 1.
  *
- * @input argv; `{ env, stdout, stderr, fetch, stdin, browser, sleep }`
+ * @input argv; `{ env, stdout, stderr, fetch, stdin, browser, sleep, spawn, now, pollMs, pollTimeoutMs }`
  * @output The exit code
  * @dependencies node:fs/promises, cli/core/site-args, cli/core/api-client,
  *               cli/core/output, cli/commands/registry, cli/auth/credential, cli/store/vault
@@ -61,7 +61,7 @@ function usage(stderr, message) {
     return EXIT.USAGE;
 }
 
-export async function main(argv, { env = {}, stdout, stderr, fetch, stdin, browser, sleep } = {}) {
+export async function main(argv, { env = {}, stdout, stderr, fetch, stdin, browser, sleep, spawn, now, pollMs, pollTimeoutMs } = {}) {
     let { name, rest } = splitCommand(argv);
     if (name === 'help') {
         const asked = rest.find((arg) => !arg.startsWith('-'));
@@ -77,7 +77,7 @@ export async function main(argv, { env = {}, stdout, stderr, fetch, stdin, brows
     }
     const flags = readFlags(rest, command?.flags);
     if (flags.usageError) return usage(stderr, flags.usageError);
-    const { values, positionals } = flags;
+    const { values, positionals, afterDashes } = flags;
     if (values.version) {
         stdout.write(await version() + '\n');
         return EXIT.OK;
@@ -88,7 +88,7 @@ export async function main(argv, { env = {}, stdout, stderr, fetch, stdin, brows
     }
     const site = siteFrom(values, env);
     if (site.error) return usage(stderr, site.error);
-    const asked = command.parse(values, positionals, env);
+    const asked = command.parse(values, positionals, env, { afterDashes });
     if (asked.usageError) return usage(stderr, asked.usageError);
     const running = await version();
     const warn = (text) => stderr.write(text);
@@ -116,6 +116,8 @@ export async function main(argv, { env = {}, stdout, stderr, fetch, stdin, brows
             baseUrl: site.url, env, stdout, stderr, fetch, stdin, version: running,
             // How login opens a browser and waits between asks, as a test hands them in
             browser, sleep,
+            // How secret run starts a command and waits for an approval, as a test hands them in
+            spawn, now, pollMs, pollTimeoutMs,
         });
     } catch (error) {
         stderr.write('markest: ' + redact(error && error.message ? error.message : error, [...auth.secrets(), keyFrom(env)]) + '\n');

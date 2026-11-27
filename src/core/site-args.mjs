@@ -77,8 +77,10 @@ export function keyFrom(env = {}) {
 /** A command's arguments read against its own flags and every command's. */
 export function readFlags(argv, flags = {}) {
     try {
-        const { values, positionals } = parseArgs({ args: argv, options: { ...GLOBAL_FLAGS, ...flags }, allowPositionals: true, strict: true });
-        return { values, positionals };
+        const { values, positionals, tokens } = parseArgs({ args: argv, options: { ...GLOBAL_FLAGS, ...flags }, allowPositionals: true, strict: true, tokens: true });
+        // What came after a bare --, for the command that runs one (it is also still among the positionals)
+        const dashes = tokens.find((token) => token.kind === 'option-terminator');
+        return { values, positionals, afterDashes: dashes ? argv.slice(dashes.index + 1) : null };
     } catch (error) {
         return { usageError: error.message };
     }

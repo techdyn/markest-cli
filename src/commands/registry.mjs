@@ -3,7 +3,7 @@
  * @description Every command the tool has, by name, in the order its help
  *              lists them: signing in first, then publishing, reading, managing, the
  *              artifact's history, its conversation and its readers, searching,
- *              the keys of encrypted artifacts, and every agent tool the site
+ *              the keys of encrypted artifacts, the secret slots of an artifact, and every agent tool the site
  *              has. A command is an object with its name, a one-line summary,
  *              its usage and help, its own flags, `parse` (what was asked, or a
  *              usage error), `needsKey` and `run`; a module offers one
@@ -27,9 +27,10 @@ import { commands as sharing } from './sharing.mjs';
 import { commands as search } from './search.mjs';
 import { commands as tools } from './tools.mjs';
 import { commands as keys } from './keys.mjs';
+import { commands as secrets } from './secrets.mjs';
 import { command as mcp } from './mcp.mjs';
 
-const ALL = [...auth, publish, ...draft, ...reading, ...artifacts, ...settings, ...images, ...history, ...conversation, ...sharing, ...search, ...keys, mcp, ...tools];
+const ALL = [...auth, publish, ...draft, ...reading, ...artifacts, ...settings, ...images, ...history, ...conversation, ...sharing, ...secrets, ...search, ...keys, mcp, ...tools];
 
 export const COMMANDS = new Map(ALL.map((one) => [one.name, one]));
 
